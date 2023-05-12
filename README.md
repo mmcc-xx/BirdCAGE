@@ -5,7 +5,7 @@ The BirdNET-Analyze directory contains some "patches" to make to BirdNET-Analyze
 
 The BirdNET-Pi contains changes to allow it to use that API. This won't work unless you have the above server going.
 
-## Here's what you're going to do
+## Here's what you're gonna do
 - Install BirdNET-Pi somewhere. There are directions in the Dicussions area of the BirdNET-Pi repo for getting it installed in a Debian VM in case you aren't down with the whole Pi thing.
 - Go into the BirdNET-Analyzer directory. Do what it says there.
 - Go into the BirdNET-Pi directory. Do what it says there.
