@@ -1,4 +1,4 @@
-# Here is what you're gonna do
+# Here's what you're gonna do
 
 - Replace server.py in the scripts directory of your BirdNET-Pi installation (probably /home/pi/BirdNET/scripts) with the one from this directory.
 - But first back up the old one
