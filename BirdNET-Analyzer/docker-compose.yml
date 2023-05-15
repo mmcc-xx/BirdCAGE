@@ -1,0 +1,7 @@
+version: "2.3"
+services:
+  birdnetserver:
+    restart: unless-stopped
+    image: birdnetserver
+    ports:
+      - 7667:8080
