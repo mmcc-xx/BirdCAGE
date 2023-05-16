@@ -1,0 +1,626 @@
+openapi: 3.0.0
+info:
+  title: Streams API
+  version: 1.0.0
+paths:
+  /api/streams:
+    get:
+      summary: Get all streams
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
+    post:
+      summary: Create a new stream
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                address:
+                  type: string
+                protocol:
+                  type: string
+                transport:
+                  type: string
+              required:
+                - name
+                - address
+                - protocol
+      responses:
+        '201':
+          description: Stream created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Invalid input
+
+  /api/streams/{stream_id}:
+    put:
+      summary: Update a stream by ID
+      parameters:
+        - name: stream_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                address:
+                  type: string
+                protocol:
+                  type: string
+                transport:
+                  type: string
+              required:
+                - name
+                - address
+                - protocol
+      responses:
+        '200':
+          description: Stream updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Invalid input
+        '404':
+          description: Stream not found
+
+    delete:
+      summary: Delete a stream by ID
+      parameters:
+        - name: stream_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Stream deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Stream not found
+
+  /api/preferences/{user_id}:
+    get:
+      summary: Get all preferences for the specified user
+      operationId: get_preferences
+      tags:
+        - preferences
+      parameters:
+        - name: user_id
+          in: path
+          description: ID of the user
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A JSON object containing user preferences
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+
+  /api/preferences:
+    post:
+      summary: Set or update a user preference
+      operationId: set_preference
+      tags:
+        - preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferenceRequest'
+      responses:
+        '200':
+          description: Preference set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /api/preferences/{user_id}/{preference_key}:
+    delete:
+      summary: Delete a user preference
+      operationId: delete_preference
+      tags:
+        - preferences
+      parameters:
+        - name: user_id
+          in: path
+          description: ID of the user
+          required: true
+          schema:
+            type: integer
+        - name: preference_key
+          in: path
+          description: Key of the preference to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Preference deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  /audio-files/{filename}:
+    get:
+      summary: Retrieve an audio file
+      description: This endpoint serves the audio files stored on the server.
+      parameters:
+        - name: filename
+          in: path
+          description: The name of the audio file, including the file extension.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Audio file retrieved successfully.
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Audio file not found.
+
+  /api/detections/recent/{limit}:
+    get:
+      summary: Retrieve X most recent detections
+      parameters:
+        - name: limit
+          in: path
+          description: Number of most recent detections to retrieve
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Recent detections retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Detection'
+
+  /api/detections/date/{date}:
+    get:
+      summary: Retrieve all detections for a given day
+      parameters:
+        - name: date
+          in: path
+          description: Date for which detections should be retrieved (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Detections for the given day retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Detection'
+
+  /api/detections/date/{date}/count:
+    get:
+      summary: Retrieve the total number of detections for a given day
+      parameters:
+        - name: date
+          in: path
+          description: Date for which the count of detections should be retrieved (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Count of detections for the given day retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+
+  /api/detections/date/{date}/grouped/{sort_order}:
+    get:
+      summary: Retrieve the number of detections for a given day for unique scientific_names, sorted by count
+      parameters:
+        - name: date
+          in: path
+          description: Date for which grouped detections should be retrieved (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: sort_order
+          in: path
+          description: Sort order for the grouped detections (asc or desc)
+          required: true
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: Grouped detections for the given day retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    scientific_name:
+                      type: string
+                    count:
+                      type: integer
+
+  /api/detections/date/{date}/scientific_name/{scientific_name}/confidence:
+    get:
+      summary: Retrieve all detections for a given day for a given scientific_name, sorted by confidence descending
+      parameters:
+        - name: date
+          in: path
+          description: Date for which detections should be retrieved (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: scientific_name
+          in: path
+          description: Scientific name to filter the detections
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detections for the given day and scientific_name retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Detection'
+
+  /api/detections/date/{date}/scientific_name/{scientific_name}/timestamp:
+    get:
+      summary: Retrieve all detections for a given day for a given scientific_name, sorted by timestamp ascending
+      parameters:
+        - name: date
+          in: path
+          description: Date for which detections should be retrieved (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: scientific_name
+          in: path
+          description: Scientific name to filter the detections
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detections for the given day and scientific_name retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Detection'
+
+  /api/detections/date/{date}/highest_confidence:
+    get:
+      summary: Retrieve the detections for a given day with the highest confidence for each unique scientific_name
+      parameters:
+        - name: date
+          in: path
+          description: Date for which detections should be retrieved (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Detections with the highest confidence for each scientific_name retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Detection'
+
+openapi: 3.0.0
+info:
+  title: Detections API
+  version: 1.0.0
+
+paths:
+  /api/detections/date_range/{start_date}/{end_date}:
+    get:
+      summary: Get all detections for a date range
+      parameters:
+        - in: path
+          name: start_date
+          schema:
+            type: string
+          required: true
+          description: The start date for the date range (YYYY-MM-DD)
+        - in: path
+          name: end_date
+          schema:
+            type: string
+          required: true
+          description: The end date for the date range (YYYY-MM-DD)
+      responses:
+        200:
+          description: A list of detections within the specified date range
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Detection'
+
+  /api/detections/date_range/{start_date}/{end_date}/count:
+    get:
+      summary: Get the number of detections for a date range
+      parameters:
+        - in: path
+          name: start_date
+          schema:
+            type: string
+          required: true
+          description: The start date for the date range (YYYY-MM-DD)
+        - in: path
+          name: end_date
+          schema:
+            type: string
+          required: true
+          description: The end date for the date range (YYYY-MM-DD)
+      responses:
+        200:
+          description: The count of detections within the specified date range
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+
+  /api/detections/date_range/{start_date}/{end_date}/grouped/{sort_order}:
+    get:
+      summary: Get the number of detections for unique scientific names within a date range, sorted by count
+      parameters:
+        - in: path
+          name: start_date
+          schema:
+            type: string
+          required: true
+          description: The start date for the date range (YYYY-MM-DD)
+        - in: path
+          name: end_date
+          schema:
+            type: string
+          required: true
+          description: The end date for the date range (YYYY-MM-DD)
+        - in: path
+          name: sort_order
+          schema:
+            type: string
+            enum: [asc, desc]
+          required: true
+          description: The sort order for the grouped detections (asc or desc)
+      responses:
+        200:
+          description: A list of grouped detections within the specified date range, sorted by count
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupedDetection'
+        400:
+          description: Invalid sort order provided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /api/detections/date_range/{start_date}/{end_date}/scientific_name/{scientific_name}/confidence:
+    get:
+      summary: Retrieve all detections for a range of dates for a given scientific_name, sorted by confidence descending
+      parameters:
+        - name: start_date
+          in: path
+          description: Start date for the date range (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: path
+          description: End date for the date range (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: scientific_name
+          in: path
+          description: Scientific name to filter the detections
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detections for the given scientific_name and date range retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Detection'
+
+  /api/detections/date_range/{start_date}/{end_date}/scientific_name/{scientific_name}/timestamp:
+    get:
+      summary: Retrieve all detections for a range of dates for a given scientific_name, sorted by timestamp ascending
+      parameters:
+        - name: start_date
+          in: path
+          description: Start date for the date range (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: path
+          description: End date for the date range (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: scientific_name
+          in: path
+          description: Scientific name to filter the detections
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detections for the given scientific_name and date range retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Detection'
+
+  /api/detections/date_range/{start_date}/{end_date}/highest_confidence:
+    get:
+      summary: Retrieve the detections for a range of dates with the highest confidence for each unique scientific_name
+      parameters:
+        - name: start_date
+          in: path
+          description: Start date for the date range (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: path
+          description: End date for the date range (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Detections with the highest confidence for each unique scientific_name retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Detection'
+
+
+
+components:
+  schemas:
+    Detection:
+      type: object
+      properties:
+        id:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        stream_id:
+          type: integer
+        streamname:
+          type: string
+        scientific_name:
+          type: string
+        common_name:
+          type: string
+        confidence:
+          type: number
+          format: float
+        filename:
+          type: string
+    PreferenceRequest:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: ID of the user
+        preference_key:
+          type: string
+          description: Key of the preference
+        preference_value:
+          type: string
+          description: Value of the preference
+      required:
+        - user_id
+        - preference_key
+        - preference_value
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
