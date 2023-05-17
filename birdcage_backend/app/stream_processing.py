@@ -26,14 +26,14 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
             (
                 ffmpeg
                 .input(stream_url, rtsp_transport=transport.lower())
-                .output(output_filename, format='wav', t=seconds)
+                .output(output_filename, format='wav', t=seconds, loglevel='warning')
                 .run()
             )
         else:
             (
                 ffmpeg
                 .input(stream_url)
-                .output(output_filename, format='wav', t=seconds)
+                .output(output_filename, format='wav', t=seconds, loglevel='warning')
                 .run()
             )
         return {'status': 'success', 'filepath': output_filename}
@@ -165,6 +165,7 @@ def analyze_recordings():
     # This loop will look for wav files, analyze them, sleep a bit and then do it again
     while True:
         # Get all .wav files in the directory
+
         wav_files = glob.glob(os.path.join(TEMP_DIR, '*.wav'))
 
         # Sort the files by creation time (oldest first)
@@ -176,45 +177,53 @@ def analyze_recordings():
             recording_metadata = get_metadata_by_filename(filename)
 
             if recording_metadata is None:
-                # if there's no metadata the file is of no use. Delete it
-                #if os.path.exists(file_path):
-                #    os.remove(file_path)
-                break
+                # Check if the file is older than 5 minutes
+                file_creation_time = os.path.getctime(file_path)
+                current_time = time.time()
+                time_difference_in_seconds = current_time - file_creation_time
+                time_difference_in_minutes = time_difference_in_seconds / 60
 
-            # analyze that recording
-            stream_id = recording_metadata['stream_id']
-            streamname = recording_metadata['streamname']
-            timestamp = recording_metadata['timestamp']
-            filename = recording_metadata['filename']
-
-            # Get the current time
-            now = datetime.now()
-
-            # Get the week number
-            year, week_number, weekday = now.isocalendar()
-
-            mdata = {'lat': preferences['latitude'],
-                     'lon': preferences['longitude'],
-                     'week': week_number,
-                     'overlap': preferences['overlap'],
-                     'sensitivity': preferences['sensitivity'],
-                     'sf_thresh': preferences['sf_thresh'],
-                     'pmode': 'max',
-                     'num_results': 5,
-                     'save': False}
-
-            analysis = sendRequest(file_path, json.dumps(mdata))
-            if analysis['msg'] == 'success':
-                print(analysis, flush=True)
-                check_results(analysis['results'], file_path, recording_metadata, preferences)
-
-                # That file has been analyzed and results stored. Delete it an its metadata record
-                if os.path.exists(file_path):
+                if time_difference_in_minutes > 5:
+                    # Delete the file
                     os.remove(file_path)
-                delete_metadata_by_filename(filename)
+                    print(f"There is no metadata and the file is old. Deleted file: {filename}", flush=True)
 
             else:
-                print('FAIL')
+
+                # analyze that recording
+                stream_id = recording_metadata['stream_id']
+                streamname = recording_metadata['streamname']
+                timestamp = recording_metadata['timestamp']
+                filename = recording_metadata['filename']
+
+                # Get the current time
+                now = datetime.now()
+
+                # Get the week number
+                year, week_number, weekday = now.isocalendar()
+
+                mdata = {'lat': preferences['latitude'],
+                         'lon': preferences['longitude'],
+                         'week': week_number,
+                         'overlap': preferences['overlap'],
+                         'sensitivity': preferences['sensitivity'],
+                         'sf_thresh': preferences['sf_thresh'],
+                         'pmode': 'max',
+                         'num_results': 5,
+                         'save': False}
+
+                analysis = sendRequest(file_path, json.dumps(mdata))
+                if analysis['msg'] == 'success':
+                    print(analysis, flush=True)
+                    check_results(analysis['results'], file_path, recording_metadata, preferences)
+
+                    # That file has been analyzed and results stored. Delete it an its metadata record
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                    delete_metadata_by_filename(filename)
+
+                else:
+                    print('FAIL')
 
         time.sleep(1)
 

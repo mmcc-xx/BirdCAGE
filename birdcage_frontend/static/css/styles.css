@@ -1,0 +1,20 @@
+/* Add vertical dividers to table cells */
+#detections-by-day-and-hour-table td {
+  border-right: 1px solid #dee2e6; /* Change this color if needed to match your horizontal dividers */
+}
+
+/* Remove the right border from the last cell in each row */
+#detections-by-day-and-hour-table tr td:last-child {
+  border-right: none;
+}
+
+/* Center the content of table cells */
+#detections-by-day-and-hour-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+#detections-by-day-and-hour-table th {
+  text-align: center;
+  vertical-align: middle;
+}

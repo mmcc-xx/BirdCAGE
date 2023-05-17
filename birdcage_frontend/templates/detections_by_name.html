@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detections for {{ common_name }} on {{ date }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/birdcage.png') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="my-4">Detections for {{ common_name }} on {{ date }}</h1>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table" id="detections-by-common-name-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Stream Name</th>
+                                <th>Confidence</th>
+                                <th>Audio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_SERVER_URL = "{{ api_server_url }}";
+        const formattedDate = "{{ date }}";
+        const commonName = "{{ common_name }}";
+
+        function updateDetectionsByCommonNameTable() {
+            fetch(`{{ api_server_url }}/api/detections/by_common_name/${formattedDate}/${encodeURIComponent(commonName)}`)
+                .then(response => response.json())
+                .then(detections => {
+                    const tableBody = document.querySelector('#detections-by-common-name-table tbody');
+                    tableBody.innerHTML = '';
+
+                    detections.forEach(detection => {
+                        const row = document.createElement('tr');
+
+                        const selectedValues = [
+                            detection.timestamp, // Timestamp
+                            detection.streamname, // Stream Name
+                            detection.confidence  // Confidence
+                        ];
+
+                        selectedValues.forEach(value => {
+                            const cell = document.createElement('td');
+                            cell.textContent = value;
+                            row.appendChild(cell);
+                        });
+
+                        // Add audio player widget
+                        const audioCell = document.createElement('td');
+                        const audioPlayer = document.createElement('audio');
+                        audioPlayer.controls = true;
+                        audioPlayer.src = `${API_SERVER_URL}/api/audio-files/${detection.filename}`;
+                        audioCell.appendChild(audioPlayer);
+                        row.appendChild(audioCell);
+
+                        tableBody.appendChild(row);
+                    });
+                });
+        }
+
+        updateDetectionsByCommonNameTable();
+    </script>
+</body>
+</html>

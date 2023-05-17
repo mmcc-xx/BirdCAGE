@@ -215,3 +215,76 @@ def get_detections_with_highest_confidence_date_range(start_date, end_date):
     connection.close()
 
     return jsonify(detections)
+
+
+@detections_blueprint.route('/api/detections/count_by_hour/<string:date>', methods=['GET'])
+def get_detections_by_day_and_hour(date):
+    connection = sqlite3.connect(DATABASE_FILE)
+    cursor = connection.cursor()
+
+    cursor.execute("""    
+        SELECT common_name,    
+               strftime('%Y-%m-%d', timestamp) AS date,    
+               strftime('%H', timestamp) AS hour,    
+               COUNT(*) AS count    
+        FROM detections    
+        WHERE date(timestamp) = date(?)    
+        GROUP BY common_name, date, hour    
+        ORDER BY count DESC, common_name, hour    
+    """, (date,))
+
+    data = cursor.fetchall()
+    print("here's data in count_by_hour:")
+    print(data, flush=True)
+
+    # Convert the tuples to dictionaries
+    results = [
+        {
+            'common_name': row[0],
+            'date': row[1],
+            'hour': row[2],
+            'count': row[3],
+        } for row in data
+    ]
+
+    return jsonify(results)
+
+
+@detections_blueprint.route('/api/detections/by_hour/<date>/<int:hour>')
+def get_detections_by_hour(date, hour):
+    connection = sqlite3.connect(DATABASE_FILE)
+    cursor = connection.cursor()
+
+    cursor.execute('''  
+        SELECT * FROM detections  
+        WHERE strftime('%Y-%m-%dT%H', timestamp) = ? || 'T' || ?  
+        ORDER BY timestamp ASC  
+    ''', (date, hour))
+
+    results = cursor.fetchall()
+    column_names = [description[0] for description in cursor.description]
+    detections = [dict(zip(column_names, result)) for result in results]
+
+    connection.close()
+
+    return jsonify(detections)
+
+
+@detections_blueprint.route('/api/detections/by_common_name/<date>/<common_name>')
+def get_detections_by_common_name(date, common_name):
+    connection = sqlite3.connect(DATABASE_FILE)
+    cursor = connection.cursor()
+
+    cursor.execute('''    
+        SELECT * FROM detections    
+        WHERE strftime('%Y-%m-%d', timestamp) = ? AND common_name = ?    
+        ORDER BY timestamp ASC    
+    ''', (date, common_name))
+
+    results = cursor.fetchall()
+    column_names = [description[0] for description in cursor.description]
+    detections = [dict(zip(column_names, result)) for result in results]
+
+    connection.close()
+
+    return jsonify(detections)

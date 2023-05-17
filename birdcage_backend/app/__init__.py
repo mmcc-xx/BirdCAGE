@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from celery import Celery
 from .celery_config import broker_url, result_backend
 from .stream_processing import process_streams
@@ -10,6 +11,10 @@ from app.views.detections import detections_blueprint
 
 def create_app(init_celery=True):
     app = Flask(__name__, static_url_path='/static', static_folder='static')
+    CORS(app, origins=[
+        "http://192.168.1.75:7008",
+        "http://birdcage.casefamily.audioandoddities.com"
+    ])
 
     if init_celery:
         # Initialize Celery
