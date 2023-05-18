@@ -1,3 +1,5 @@
+If you want birdnet-pi to use an external analysis server...
+
 # Here's what you're gonna do
 
 - Replace server.py in the scripts directory of your BirdNET-Pi installation (probably /home/pi/BirdNET/scripts) with the one from this directory.
