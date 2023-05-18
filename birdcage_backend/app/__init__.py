@@ -7,14 +7,22 @@ from app.views.streams import streams_blueprint
 from app.views.preferences import preferences_blueprint
 from app.views.audio_files import audio_files_blueprint
 from app.views.detections import detections_blueprint
-
+from app.models.streams import create_streams_table
+from app.models.preferences import create_preferences_table
+from app.models.recording_metadata import create_recording_metadata_table
+from app.models.detections import create_detections_table
+from config import CORS_ORIGINS
 
 def create_app(init_celery=True):
     app = Flask(__name__, static_url_path='/static', static_folder='static')
-    CORS(app, origins=[
-        "http://192.168.1.75:7008",
-        "http://birdcage.casefamily.audioandoddities.com"
-    ])
+
+    cors_origins = CORS_ORIGINS.split(',')
+    CORS(app, origins=cors_origins)
+
+    create_streams_table()
+    create_preferences_table()
+    create_recording_metadata_table()
+    create_detections_table()
 
     if init_celery:
         # Initialize Celery

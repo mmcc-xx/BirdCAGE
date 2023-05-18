@@ -242,7 +242,7 @@ def get_detections_by_day_and_hour(date):
         {
             'common_name': row[0],
             'date': row[1],
-            'hour': row[2],
+            'hour': str(int(row[2])),
             'count': row[3],
         } for row in data
     ]
@@ -255,11 +255,14 @@ def get_detections_by_hour(date, hour):
     connection = sqlite3.connect(DATABASE_FILE)
     cursor = connection.cursor()
 
-    cursor.execute('''  
-        SELECT * FROM detections  
-        WHERE strftime('%Y-%m-%dT%H', timestamp) = ? || 'T' || ?  
-        ORDER BY timestamp ASC  
-    ''', (date, hour))
+    # Zero-pad the hour if it's a single-digit number
+    hour_str = f"{hour:02d}"
+
+    cursor.execute('''    
+        SELECT * FROM detections    
+        WHERE strftime('%Y-%m-%dT%H', timestamp) = ? || 'T' || ?    
+        ORDER BY timestamp ASC    
+    ''', (date, hour_str))
 
     results = cursor.fetchall()
     column_names = [description[0] for description in cursor.description]

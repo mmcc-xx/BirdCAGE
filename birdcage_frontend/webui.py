@@ -1,10 +1,12 @@
 from flask import Flask, render_template
+import requests
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
-API_SERVER_URL = "http://birdcageapi.casefamily.audioandoddities.com"
-
+API_SERVER_URL = os.environ.get('API_SERVER_URL', 'http://192.168.1.75:7007')
+WEBUI_PORT = os.environ.get('WEBUI_PORT', '7008')
 
 @app.route('/')
 def index():
@@ -27,5 +29,17 @@ def daily_summary(date):
     return render_template('daily_summary.html', date=date, api_server_url=API_SERVER_URL)
 
 
+@app.route('/stream_settings', methods=['GET'])
+def streams():
+    return render_template('stream_settings.html', api_server_url=API_SERVER_URL)
+
+
+@app.route('/preferences', methods=['GET'])
+def preferences():
+    user_id = 0
+    response = requests.get(f"{API_SERVER_URL}/api/preferences/{user_id}")
+    current_preferences = response.json()
+    return render_template('preferences.html', api_server_url=API_SERVER_URL, current_preferences=current_preferences)
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=7008)
+    app.run(debug=True, host='0.0.0.0', port=int(WEBUI_PORT))

@@ -137,8 +137,19 @@ def check_results(results, filepath, recording_metadata, preferences):
                 # Trim the wav file to the interval and save as mp3 if not already saved
                 if not mp3_saved:
                     # Generate a UUID for the mp3 filename
+
+                    recordinglength = int(preferences['recordinglength'])
+                    extractionlength = int(preferences['extractionlength'])
+                    spacelength = (extractionlength - 3)/2
+                    startwithspace = start_time - spacelength
+                    if startwithspace < 0:
+                        startwithspace = 0
+                    endwithspace = end_time + spacelength
+                    if endwithspace > recordinglength:
+                        endwithspace = recordinglength
+
                     mp3_filename = f"{str(uuid.uuid4())}.mp3"
-                    trimmed_audio = wav_audio[int(start_time * 1000):int(end_time * 1000)]
+                    trimmed_audio = wav_audio[int(startwithspace * 1000):int(endwithspace * 1000)]
                     trimmed_audio.export(DETECTION_DIR + "/" + mp3_filename, format="mp3")
                     mp3_saved = True
 
@@ -217,7 +228,7 @@ def analyze_recordings():
                     print(analysis, flush=True)
                     check_results(analysis['results'], file_path, recording_metadata, preferences)
 
-                    # That file has been analyzed and results stored. Delete it an its metadata record
+                    # That file has been analyzed and results stored. Delete it and its metadata record
                     if os.path.exists(file_path):
                         os.remove(file_path)
                     delete_metadata_by_filename(filename)

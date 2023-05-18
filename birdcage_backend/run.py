@@ -5,7 +5,7 @@ from app.models.recording_metadata import create_recording_metadata_table
 from app.models.detections import create_detections_table
 from flask import Flask, redirect
 from flask_swagger_ui import get_swaggerui_blueprint
-from config import SERVER_PORT
+from config import API_SERVER_PORT
 
 app = create_app(init_celery=False)
 
@@ -29,8 +29,4 @@ def index():
 
 
 if __name__ == '__main__':
-    create_streams_table()
-    create_preferences_table()
-    create_recording_metadata_table()
-    create_detections_table()
-    app.run(host='0.0.0.0', port=SERVER_PORT)
+    app.run(host='0.0.0.0', port=API_SERVER_PORT)

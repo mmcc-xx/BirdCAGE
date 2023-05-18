@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streams Management</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Streams Management</h1>
+        <!-- Add a form for creating a new stream -->
+        <h2>Create Stream</h2>
+        <form id="create-stream-form">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" id="name" placeholder="Enter name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" class="form-control" id="address" placeholder="Enter address" name="address" required>
+            </div>
+            <div class="form-group">
+                <label for="protocol">Protocol:</label>
+                <select class="form-control" id="protocol" name="protocol" required>
+                    <option value="http">HTTP</option>
+                    <option value="rtsp">RTSP</option>
+                    <option value="rtmp">RTMP</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="transport">Transport:</label>
+                <select class="form-control" id="transport" name="transport">
+                    <option value="">None</option>
+                    <option value="udp">UDP</option>
+                    <option value="tcp">TCP</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Stream</button>
+        </form>
+        <!-- Add a form for updating a stream -->
+        <h2 id="update-stream-title" style="display:none">Update Stream</h2>
+        <form id="update-stream-form" style="display:none">
+            <input type="hidden" id="update-stream-id">
+            <div class="form-group">
+                <label for="update-name">Name:</label>
+                <input type="text" class="form-control" id="update-name" placeholder="Enter name" name="update-name" required>
+            </div>
+            <div class="form-group">
+                <label for="update-address">Address:</label>
+                <input type="text" class="form-control" id="update-address" placeholder="Enter address" name="update-address" required>
+            </div>
+            <div class="form-group">
+                <label for="update-protocol">Protocol:</label>
+                <select class="form-control" id="update-protocol" name="update-protocol" required>
+                    <option value="http">HTTP</option>
+                    <option value="rtsp">RTSP</option>
+                    <option value="rtmp">RTMP</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="update-transport">Transport:</label>
+                <select class="form-control" id="update-transport" name="update-transport">
+                    <option value="">None</option>
+                    <option value="udp">UDP</option>
+                    <option value="tcp">TCP</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Stream</button>
+        </form>
+        <!-- Display the list of streams -->
+        <h2>Streams</h2>
+        <table class="table" id="streams-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Protocol</th>
+                    <th>Transport</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+
+    $(document).ready(function() {
+        function getStreams() {
+            $.ajax({
+                url: "{{ api_server_url }}/api/streams",
+                type: "GET",
+                dataType: "json",
+                success: function(data) {
+                    displayStreams(data);
+                },
+                error: function(error) {
+                    console.error("Error fetching streams:", error);
+                }
+            });
+        }
+
+        function displayStreams(streams) {
+            const tableBody = $("#streams-table tbody");
+            tableBody.empty();
+            for (const stream of streams) {
+                const row = $("<tr>");
+                row.append($("<td>").text(stream.id));
+                row.append($("<td>").text(stream.name));
+                row.append($("<td>").text(stream.address));
+                row.append($("<td>").text(stream.protocol));
+                row.append($("<td>").text(stream.transport));
+                const actions = $("<td>");
+                const editButton = $("<button>").text("Edit").addClass("btn btn-sm btn-primary");
+                editButton.click(function() {
+                    $("#update-stream-id").val(stream.id);
+                    $("#update-name").val(stream.name);
+                    $("#update-address").val(stream.address);
+                    $("#update-protocol").val(stream.protocol);
+                    $("#update-transport").val(stream.transport);
+                    $("#update-stream-title").show();
+                    $("#update-stream-form").show();
+                });
+                actions.append(editButton);
+
+                // Add a delete button
+                const deleteButton = $("<button>").text("Delete").addClass("btn btn-sm btn-danger");
+                deleteButton.click(function() {
+                    deleteStream(stream.id);
+                });
+                actions.append(deleteButton);
+
+                row.append(actions);
+                tableBody.append(row);
+            }
+        }
+
+
+        $("#create-stream-form").submit(function(event) {
+            event.preventDefault();
+            const streamData = {
+                name: $("#name").val(),
+                address: $("#address").val(),
+                protocol: $("#protocol").val(),
+                transport: $("#transport").val()
+            };
+            $.ajax({
+                url: "{{ api_server_url }}/api/streams",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(streamData),
+                success: function(data) {
+                    $("#create-stream-form").trigger("reset");
+                    getStreams();
+                },
+                error: function(error) {
+                    console.error("Error creating stream:", error);
+                }
+            });
+        });
+
+        $("#update-stream-form").submit(function(event) {
+            event.preventDefault();
+            const streamId = $("#update-stream-id").val();
+            const streamData = {
+                name: $("#update-name").val(),
+                address: $("#update-address").val(),
+                protocol: $("#update-protocol").val(),
+                transport: $("#update-transport").val()
+            };
+            $.ajax({
+                url: `{{ api_server_url }}/api/streams/${streamId}`,
+                type: "PUT",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(streamData),
+                success: function(data) {
+                    $("#update-stream-form").trigger("reset");
+                    $("#update-stream-title").hide();
+                    $("#update-stream-form").hide();
+                    getStreams();
+                },
+                error: function(error) {
+                    console.error("Error updating stream:", error);
+                }
+            });
+        });
+
+        function deleteStream(streamId) {
+            $.ajax({
+                url: `{{ api_server_url }}/api/streams/${streamId}`,
+                type: "DELETE",
+                dataType: "json",
+                success: function(data) {
+                    getStreams();
+                },
+                error: function(error) {
+                    console.error("Error deleting stream:", error);
+                }
+            });
+        }
+
+        getStreams();
+    });
+
+    </script>
+</body>
+</html>

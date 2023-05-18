@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Preferences</title>
+</head>
+<body>
+    <h1>Set Preferences</h1>
+    <form id="preferences-form">
+        <table>
+            <tr>
+                <th>Preference Key</th>
+                <th>Preference Value</th>
+            </tr>
+            <tr>
+                <td>Recording Length</td>
+                <td><input type="text" name="recordinglength" value="{{ current_preferences.recordinglength }}"></td>
+            </tr>
+            <tr>
+                <td>Confidence</td>
+                <td><input type="text" name="confidence" value="{{ current_preferences.confidence }}"></td>
+            </tr>
+            <tr>
+                <td>Extraction Length</td>
+                <td><input type="text" name="extractionlength" value="{{ current_preferences.extractionlength }}"></td>
+            </tr>
+            <tr>
+                <td>Latitude</td>
+                <td><input type="text" name="latitude" value="{{ current_preferences.latitude }}"></td>
+            </tr>
+            <tr>
+                <td>Longitude</td>
+                <td><input type="text" name="longitude" value="{{ current_preferences.longitude }}"></td>
+            </tr>
+            <tr>
+                <td>Overlap</td>
+                <td><input type="text" name="overlap" value="{{ current_preferences.overlap }}"></td>
+            </tr>
+            <tr>
+                <td>Sensitivity</td>
+                <td><input type="text" name="sensitivity" value="{{ current_preferences.sensitivity }}"></td>
+            </tr>
+            <tr>
+                <td>SF Threshold</td>
+                <td><input type="text" name="sf_thresh" value="{{ current_preferences.sf_thresh }}"></td>
+            </tr>
+        </table>
+        <br>
+        <input type="submit" value="Set Preferences">
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        document.getElementById('preferences-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const api_server_url = "{{ api_server_url }}";
+            const user_id = 0;
+            const inputs = document.getElementsByTagName('input');
+            let preferences = [];
+
+            for (let input of inputs) {
+                if (input.name) {
+                    preferences.push({
+                        preference_key: input.name,
+                        preference_value: input.value,
+                    });
+                }
+            }
+
+            for (let preference of preferences) {
+                const response = await fetch(`${api_server_url}/api/preferences`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id,
+                        preference_key: preference.preference_key,
+                        preference_value: preference.preference_value,
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('message').textContent += `${preference.preference_key}: ${data.message}\n`;
+            }
+        });
+    </script>
+</body>
+</html>

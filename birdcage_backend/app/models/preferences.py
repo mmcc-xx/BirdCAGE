@@ -5,14 +5,31 @@ from config import DATABASE_FILE
 def create_preferences_table():
     connection = sqlite3.connect(DATABASE_FILE)
     cursor = connection.cursor()
+    print("in create_preferences_table", flush=True)
 
-    cursor.execute('''CREATE TABLE  IF NOT EXISTS user_preferences (  
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,  
-                        user_id INTEGER NOT NULL,  
-                        preference_key TEXT NOT NULL,  
-                        preference_value TEXT NOT NULL,  
-                        last_updated TIMESTAMP NOT NULL  
+    cursor.execute('''CREATE TABLE  IF NOT EXISTS user_preferences (    
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,    
+                        user_id INTEGER NOT NULL,    
+                        preference_key TEXT NOT NULL,    
+                        preference_value TEXT NOT NULL,    
+                        last_updated TIMESTAMP NOT NULL,
+                        UNIQUE (user_id, preference_key) 
                         )''')
+
+    default_preferences = [
+        ('recordinglength', '15'),
+        ('confidence', '0.7'),
+        ('extractionlength', '6'),
+        ('latitude', '39.0473'),
+        ('longitude', '-95.6752'),
+        ('overlap', '0'),
+        ('sensitivity', '1'),
+        ('sf_thresh', '0.03'),
+    ]
+
+    for key, value in default_preferences:
+        cursor.execute('''INSERT OR IGNORE INTO user_preferences (user_id, preference_key, preference_value, last_updated)   
+                          VALUES (?, ?, ?, datetime('now'))''', (0, key, value))
 
     connection.commit()
     connection.close()

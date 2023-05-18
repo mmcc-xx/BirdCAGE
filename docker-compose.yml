@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+    networks:
+      - birdcage_net
+
+  birdcage_backend:
+    image: "mmcc73/birdcage_backend:latest"
+    ports:
+      - "7007:7007"
+    environment:
+      DATABASE_FILE: /db/birdcage.db
+      API_SERVER_PORT: 7007
+      TEMP_DIR_NAME: tmp
+      ANALYZE_SERVER: 192.168.1.75
+      ANALYZE_PORT: 7667
+      DETECTION_DIR_NAME: detections
+      CORS_ORIGINS: http://192.168.1.75:7008
+      REDIS_SERVER: redis
+      REDIS_PORT: 6379
+    volumes:
+      - "./tmp:/tmp"
+      - "./detections:/detections"
+      - "./db:/db"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/timezone:/etc/timezone:ro"
+    depends_on:
+      - redis
+    networks:
+      - birdcage_net
+
+  birdcage_frontend:
+    image: "mmcc73/birdcage_frontend:latest"
+    ports:
+      - "7008:7008"
+    environment:
+      API_SERVER_URL: http://192.168.1.75:7007
+      WEBUI_PORT: 7008
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/timezone:/etc/timezone:ro"
+    depends_on:
+      - birdcage_backend
+    networks:
+      - birdcage_net
+
+networks:
+  birdcage_net:
+    driver: bridge

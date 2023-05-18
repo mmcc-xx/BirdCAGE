@@ -10,16 +10,32 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-9 text-center">
-                <h1 class="my-4">BirdCAGE</h1>
-            </div>
-            <div class="col-3">
-                <input type="date" id="date-picker" class="form-control" value="{{ today }}" />
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">BirdCAGE</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/stream_settings">Stream Settings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/preferences">Preferences</a>
+                    </li>
+                </ul>
+                <!-- Add date picker to the navigation bar -->
+                <form class="d-flex">
+                    <input type="date" id="date-picker" class="form-control" value="{{ today }}" />
+                </form>
             </div>
         </div>
-
+    </nav>
+    <!-- End of Navigation -->
+    <div class="container-fluid">
         <div class="row">
             <div class="col-12">
                 <h2>Recent Detections</h2>
@@ -60,7 +76,8 @@
             </div>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
     <script>
         const API_SERVER_URL = "{{ api_server_url }}";
 
@@ -135,8 +152,22 @@
                 });
         }
 
+        const getCurrentDateInTimezone = (timezone) => {
+          const now = new Date();
+          const options = { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' };
+          const formattedDate = new Intl.DateTimeFormat('en-US', options).format(now);
+
+          const [month, day, year] = formattedDate.split('/');
+          return `${year}-${month}-${day}`;
+        };
+
         function updateDetectionsByDayAndHourTable() {
-            const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const today = getCurrentDateInTimezone(timezone);
+
+            // const today = now.toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
             fetch(`{{ api_server_url }}/api/detections/count_by_hour/${today}`)
                 .then(response => response.json())
                 .then(data => {
