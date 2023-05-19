@@ -2,7 +2,7 @@
 
 # Newest stuff
 - Made the UI more consistent. Setting preferences and streams is still pretty bad though.
-- Just in as of 11:49 eastern US time on May 19th, tiny dynamically generated tiny spectrograms. So neat.
+- Just in as of 11:49 eastern US time on May 19th, dynamically generated tiny spectrograms. So neat.
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide
