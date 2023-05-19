@@ -1,5 +1,8 @@
 ![BirdCAGE Screenshot](birdcage.JPG)
 
+# Newest stuff
+- Just in as of 11:49 eastern US time on May 19th, tiny dynamically generated tiny spectrograms. So neat.
+
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide
 rtsp and rtmp streams that contain both video and audio. Feed the audio into BirdCAGE and see what sorts of birds are hanging around.
