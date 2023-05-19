@@ -1,6 +1,7 @@
 ![BirdCAGE Screenshot](birdcage.JPG)
 
 # Newest stuff
+- Made the UI more consistent. Setting preferences and streams is still pretty bad though.
 - Just in as of 11:49 eastern US time on May 19th, tiny dynamically generated tiny spectrograms. So neat.
 
 # BirdCAGE
