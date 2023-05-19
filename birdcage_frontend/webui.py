@@ -41,5 +41,10 @@ def preferences():
     current_preferences = response.json()
     return render_template('preferences.html', api_server_url=API_SERVER_URL, current_preferences=current_preferences)
 
+
+@app.route('/detections/detection/<int:detection_id>')
+def show_detection_details(detection_id):
+    return render_template('detection_details.html', detection_id=detection_id, api_server_url=API_SERVER_URL)
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(WEBUI_PORT))

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Detection Details
+{% endblock %}
+
+{% block content %}
+    <div class="row align-items-center">
+        <div class="col-2">
+            <button id="back-btn" class="btn btn-secondary">Go Back</button>
+        </div>
+        <div class="col-10 text-center">
+            <h1 class="my-4 d-inline-block mx-auto"><span id="detection-common-name"></span></h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center">
+                <img id="spectrogram-image" class="img-fluid" alt="Spectrogram">
+                <br>
+                <audio id="audio-player" controls style="width: 100%;"></audio>
+            </div>
+            <dl class="row" id="detection-details">
+                <dt class="col-sm-3">Detection ID:</dt>
+                <dd class="col-sm-9" id="detection-id"></dd>
+                <dt class="col-sm-3">Timestamp:</dt>
+                <dd class="col-sm-9" id="detection-timestamp"></dd>
+                <dt class="col-sm-3">Stream ID:</dt>
+                <dd class="col-sm-9" id="detection-stream-id"></dd>
+                <dt class="col-sm-3">Stream Name:</dt>
+                <dd class="col-sm-9" id="detection-streamname"></dd>
+                <dt class="col-sm-3">Scientific Name:</dt>
+                <dd class="col-sm-9" id="detection-scientific-name"></dd>
+                <dt class="col-sm-3">Confidence:</dt>
+                <dd class="col-sm-9" id="detection-confidence"></dd>
+                <dt class="col-sm-3">Filename:</dt>
+                <dd class="col-sm-9" id="detection-filename"></dd>
+            </dl>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const API_SERVER_URL = "{{ api_server_url }}";
+        const detectionId = "{{ detection_id }}";
+
+        function updateDetectionDetails() {
+            fetch(`${API_SERVER_URL}/api/detections/detection/${detectionId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Detection not found');
+                    }
+                    return response.json();
+                })
+                .then(detection => {
+                    document.querySelector('#detection-id').textContent = detection.id;
+                    document.querySelector('#detection-timestamp').textContent = detection.timestamp;
+                    document.querySelector('#detection-stream-id').textContent = detection.stream_id;
+                    document.querySelector('#detection-streamname').textContent = detection.streamname;
+                    document.querySelector('#detection-scientific-name').textContent = detection.scientific_name;
+                    document.querySelector('#detection-common-name').textContent = detection.common_name;
+                    document.querySelector('#detection-confidence').textContent = detection.confidence;
+                    document.querySelector('#detection-filename').textContent = detection.filename;
+
+                    // Set spectrogram image source
+                    const spectrogramImage = document.querySelector('#spectrogram-image');
+                    spectrogramImage.src = `${API_SERVER_URL}/api/spectrogram/${detection.filename}.png`;
+
+                    // Set audio player source
+                    const audioPlayer = document.querySelector('#audio-player');
+                    audioPlayer.src = `${API_SERVER_URL}/api/audio-files/${detection.filename}`;
+                })
+                .catch(error => {
+                    alert(error);
+                });
+        }
+
+        document.querySelector('#back-btn').addEventListener('click', () => {
+            window.history.back();
+        });
+
+        updateDetectionDetails();
+
+    </script>
+{% endblock %}

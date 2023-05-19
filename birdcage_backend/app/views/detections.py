@@ -291,3 +291,30 @@ def get_detections_by_common_name(date, common_name):
     connection.close()
 
     return jsonify(detections)
+
+
+@detections_blueprint.route('/api/detections/detection/<int:id>', methods=['GET'])
+def get_detection_by_id(id):
+    connection = sqlite3.connect(DATABASE_FILE)
+    cursor = connection.cursor()
+
+    cursor.execute('SELECT * FROM detections WHERE id = ?', (id,))
+    detection = cursor.fetchone()
+
+    connection.close()
+
+    if detection is None:
+        abort(404, description="Detection not found")
+
+    detection_data = {
+        "id": detection[0],
+        "timestamp": detection[1],
+        "stream_id": detection[2],
+        "streamname": detection[3],
+        "scientific_name": detection[4],
+        "common_name": detection[5],
+        "confidence": detection[6],
+        "filename": detection[7]
+    }
+
+    return jsonify(detection_data)

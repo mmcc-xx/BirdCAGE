@@ -87,6 +87,11 @@
                         imageCell.appendChild(imageElement);
                         row.appendChild(imageCell);
 
+                        // Add event listener to navigate to detection details page
+                        row.addEventListener('click', () => {
+                            window.location.href = `/detections/detection/${detection.id}`;
+                        });
+
                         tableBody.appendChild(row);
                     });
                 });

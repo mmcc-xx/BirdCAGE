@@ -73,3 +73,18 @@ def serve_thumb_spectrogram(filename):
     image_io = io.BytesIO(image_binary)
 
     return send_file(image_io, mimetype='image/png')
+
+
+@audio_files_blueprint.route('/api/spectrogram/<path:filename>.png')
+def serve_spectrogram(filename):
+
+    audio_path = os.path.join(DETECTION_DIR, filename)
+
+    if not os.path.exists(audio_path):
+        abort(404)
+
+    image_binary = create_spectrogram(audio_path, height=800)
+    # Convert byte array to a file-like object
+    image_io = io.BytesIO(image_binary)
+
+    return send_file(image_io, mimetype='image/png')
