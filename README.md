@@ -1,6 +1,8 @@
 ![BirdCAGE Screenshot](birdcage.JPG)
 
 # Newest stuff
+- Details page with bigger spectrogram. My camera's audio has a pretty low sample rate, so the big spectrograms 
+look not great. I hope to test with a CD quality (44.1KHz sampling, 16bit samples) source to see if it looks better
 - Made the UI more consistent. Setting preferences and streams is still pretty bad though.
 - Just in as of 11:49 eastern US time on May 19th, dynamically generated tiny spectrograms. So neat.
 
