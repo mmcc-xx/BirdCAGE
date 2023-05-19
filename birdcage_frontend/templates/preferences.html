@@ -1,12 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set Preferences</title>
-</head>
-<body>
-    <h1>Set Preferences</h1>
+{% extends "base.html" %}
+
+{% block title %}
+  Preferences
+{% endblock %}
+
+{% block content %}
+
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="my-4">Preferences</h1>
+            </div>
+        </div>
+
     <form id="preferences-form">
         <table>
             <tr>
@@ -51,7 +56,9 @@
     </form>
 
     <div id="message"></div>
+{% endblock %}
 
+{% block scripts %}
     <script>
         document.getElementById('preferences-form').addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -88,5 +95,4 @@
             }
         });
     </script>
-</body>
-</html>
+{% endblock %}
