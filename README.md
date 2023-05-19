@@ -27,6 +27,13 @@ UI. Address is the full url of the stream from your source (try opening it in VL
 Protocol is http, rtmp, or rtsp. Transport is TCP or UDP. This is only important for rtsp because it can use either one.
 - Go to Preferences and set your latitude and longitude and tweak other settings. If you live in Topeka, Kansas you are
 in luck: your latitude and longitude are already set.
+- Did the above not work?
+    - See if you can go to whatever you set as your API_SERVER_URL in your browser. You should see a (very incomplete) UI of API documentation.
+    If not, the back end / API server is not exposed to the network correctly or the docket-compose file isn't configured correctly. Or both.
+    - If that works, go back to the Preferences page, hit F12 and see if there are any client side scripting errors. All of the API
+    calls are done in client side scriping in the browser to keep things snappy. If you are accessing the Web UI through a name via a reverse
+    proxy, that name needs to be added to the CORS_ORIGINS environment variable in docker-compose.yml, you need to set a name for the back end/API server, and that name
+    needs to be specified in the API_SERVER_URL environment variable in docker-compose.yml.
 - Kill the BirdCAGE application (control C or docker-compose down). I don't have nice way to start recording from new streams yet.
 - docker-compose up one more time. It should now start recording and analyzing
 
