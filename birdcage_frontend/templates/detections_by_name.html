@@ -27,6 +27,7 @@
                                 <th>Stream Name</th>
                                 <th>Confidence</th>
                                 <th>Audio</th>
+                                <th>Spectrogram</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -42,6 +43,16 @@
         const formattedDate = "{{ date }}";
         const commonName = "{{ common_name }}";
 
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+
         function updateDetectionsByCommonNameTable() {
             fetch(`{{ api_server_url }}/api/detections/by_common_name/${formattedDate}/${encodeURIComponent(commonName)}`)
                 .then(response => response.json())
@@ -51,11 +62,12 @@
 
                     detections.forEach(detection => {
                         const row = document.createElement('tr');
+                        const formattedTimestamp = formatTimestamp(detection.timestamp);
 
                         const selectedValues = [
-                            detection.timestamp, // Timestamp
+                            formattedTimestamp, // Timestamp
                             detection.streamname, // Stream Name
-                            detection.confidence  // Confidence
+                            parseFloat(detection.confidence).toFixed(2)
                         ];
 
                         selectedValues.forEach(value => {
@@ -71,6 +83,13 @@
                         audioPlayer.src = `${API_SERVER_URL}/api/audio-files/${detection.filename}`;
                         audioCell.appendChild(audioPlayer);
                         row.appendChild(audioCell);
+
+                        // Add image widget
+                        const imageCell = document.createElement('td');
+                        const imageElement = document.createElement('img');
+                        imageElement.src = `${API_SERVER_URL}/api/spectrogram/thumb/${detection.filename}.png`;
+                        imageCell.appendChild(imageElement);
+                        row.appendChild(imageCell);
 
                         tableBody.appendChild(row);
                     });

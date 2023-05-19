@@ -15,6 +15,43 @@ basedir = os.path.dirname(os.path.abspath(__file__))
 DETECTION_DIR = os.path.join(basedir, '..', '..', DETECTION_DIR_NAME)
 
 
+def create_spectrogram(fn_audio, height=50, ratio=2):
+    clip, sample_rate = librosa.load(fn_audio, sr=None)
+    S = librosa.feature.melspectrogram(y=clip, sr=sample_rate)
+    S_db = librosa.power_to_db(S, ref=np.max)
+
+    # Set the desired output image size (height = 100, width = 200)
+    output_height = height
+    output_width = height * ratio
+
+    # Calculate the new figure size based on the desired output image size
+    dpi = 100
+    fig_height = output_height / dpi
+    fig_width = output_width / dpi
+
+    # Create a new figure with the calculated figsize
+    fig = plt.figure(figsize=(fig_width, fig_height), dpi=dpi)
+    plt.gca().set_axis_off()
+
+    # Display the spectrogram with the specified width and height
+    plt.imshow(S_db, extent=(0, output_width, 0, output_height), aspect='auto', origin='lower')
+
+    # Save the plot to an in-memory binary stream
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', bbox_inches='tight', pad_inches=0)
+    buf.seek(0)
+
+    # Read the content of the buffer as a byte array
+    png_data = buf.getvalue()
+
+    # Close the binary stream and the figure
+    buf.close()
+    plt.close(fig)
+
+    # Return the byte array
+    return png_data
+
+
 @audio_files_blueprint.route('/api/audio-files/<path:filename>')
 def serve_audio_file(filename):
     try:
@@ -23,34 +60,16 @@ def serve_audio_file(filename):
         abort(404)
 
 
-@audio_files_blueprint.route('/api/spectrogram/<path:filename>.png')
-def serve_spectrogram(filename):
+@audio_files_blueprint.route('/api/spectrogram/thumb/<path:filename>.png')
+def serve_thumb_spectrogram(filename):
 
     audio_path = os.path.join(DETECTION_DIR, filename)
 
     if not os.path.exists(audio_path):
         abort(404)
 
-    # Load the audio file, mix it down to mono, and resample it to 24000 Hz
-    y, sr = librosa.load(audio_path, sr=24000, mono=True)
+    image_binary = create_spectrogram(audio_path, height=70)
+    # Convert byte array to a file-like object
+    image_io = io.BytesIO(image_binary)
 
-    # Compute the Short-Time Fourier Transform (STFT) with a Hann window
-    #D = librosa.stft(y, n_fft=2048, hop_length=512, win_length=2048, window='hann')
-    D = librosa.stft(y, n_fft=4096, hop_length=128, win_length=4096, window='hann')
-
-    # Convert the STFT to decibels
-    D_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-
-
-    # Generate the spectrogram image
-    plt.figure(figsize=(10, 4))
-    #librosa.display.specshow(D_db, sr=24000, hop_length=512, x_axis='time', y_axis='linear')
-    librosa.display.specshow(D_db, sr=24000, hop_length=128, x_axis='time', y_axis='linear')
-    plt.colorbar(format='%+2.0f dB')
-
-    image_binary = io.BytesIO()
-    plt.savefig(image_binary, format='png')
-    image_binary.seek(0)
-    plt.close()
-
-    return send_file(image_binary, mimetype='image/png')
+    return send_file(image_io, mimetype='image/png')
