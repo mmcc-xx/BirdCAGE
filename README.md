@@ -47,7 +47,8 @@ This is early days. Chances are things will break. Let me know what's broke in t
 letter or whatever.
 
 ## To Do
-- Spectrograms!
 - Add more features, e.g. block storing recordings of selected species. I don't need any more recordings of Robins.
 - Handle changing streams and preferences without having to kill the app.
 - Some security would probably be good.
+- I'm planning to work on a "sattelite recorder" based on the ESP32 platform. It'll probably need a different interface to upload audio
+to avoid interference between the audio and WiFi.
