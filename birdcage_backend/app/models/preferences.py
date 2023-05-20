@@ -1,11 +1,11 @@
 import sqlite3
+import bcrypt
 from config import DATABASE_FILE
 
 
 def create_preferences_table():
     connection = sqlite3.connect(DATABASE_FILE)
     cursor = connection.cursor()
-    print("in create_preferences_table", flush=True)
 
     cursor.execute('''CREATE TABLE  IF NOT EXISTS user_preferences (    
                         id INTEGER PRIMARY KEY AUTOINCREMENT,    
@@ -16,6 +16,9 @@ def create_preferences_table():
                         UNIQUE (user_id, preference_key) 
                         )''')
 
+    password = 'birdcage'
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
     default_preferences = [
         ('recordinglength', '15'),
         ('confidence', '0.7'),
@@ -25,6 +28,7 @@ def create_preferences_table():
         ('overlap', '0'),
         ('sensitivity', '1'),
         ('sf_thresh', '0.03'),
+        ('password', hashed_password)
     ]
 
     for key, value in default_preferences:
@@ -63,3 +67,16 @@ def get_all_user_preferences(user_id):
     preferences = {row[0]: row[1] for row in result} if result else None
 
     return preferences
+
+
+def check_password(password_input):
+    # Retrieve the hashed password from the database
+    connection = sqlite3.connect(DATABASE_FILE)
+    cursor = connection.cursor()
+    cursor.execute("SELECT preference_value FROM user_preferences WHERE user_id = ? AND preference_key = ?",
+                   (0, 'password'))
+    stored_hashed_password = cursor.fetchone()[0]
+    connection.close()
+
+    # Verify the input password against the stored hashed password
+    return bcrypt.checkpw(password_input.encode(), stored_hashed_password.encode())

@@ -22,7 +22,7 @@
                             <th class="d-none d-md-table-cell">Stream Name</th>
                             <th>Common Name</th>
                             <th>Confidence</th>
-                            <th>Audio</th>
+                            <th class="d-none d-md-table-cell">Audio</th>
                             <th>Spectrogram</th>
                         </tr>
                     </thead>
@@ -119,6 +119,7 @@
 
                         // Add audio player widget
                         const audioCell = document.createElement('td');
+                        audioCell.classList.add('d-none', 'd-md-table-cell'); // Add classes here
                         const audioPlayer = document.createElement('audio');
                         audioPlayer.controls = true;
                         audioPlayer.src = `${API_SERVER_URL}/api/audio-files/${detection[7]}`;

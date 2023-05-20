@@ -1,8 +1,23 @@
 from flask import Blueprint, request, jsonify
 import sqlite3
 from config import DATABASE_FILE
+from ..models.preferences import check_password
+from functools import wraps
+import bcrypt
 
 preferences_blueprint = Blueprint('preferences', __name__)
+
+
+def password_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        password_input = request.headers.get('X-Password')
+        if password_input is None:
+            return jsonify({"error": "Password header is missing"}), 401
+        if not check_password(password_input):
+            return jsonify({"error": "Invalid password"}), 403
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @preferences_blueprint.route('/api/preferences/<int:user_id>', methods=['GET'])
@@ -20,8 +35,18 @@ def get_preferences(user_id):
     return jsonify(preferences_dict)
 
 
+def validate_password(password):
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long."
+
+    return True, None
+
+
 # Add a validation function to check preference constraints
 def validate_preference(preference_key, preference_value):
+    if preference_key == 'password':
+        return validate_password(preference_value)
+
     try:
         numeric_value = float(preference_value)
     except ValueError:
@@ -50,6 +75,7 @@ def validate_preference(preference_key, preference_value):
 
 
 @preferences_blueprint.route('/api/preferences', methods=['POST'])
+@password_required
 def set_preference():
     data = request.get_json()
 
@@ -62,6 +88,10 @@ def set_preference():
     if not is_valid:
         return jsonify({"error": error_message}), 400
 
+    # Hash the password if the preference_key is 'password'
+    if preference_key == 'password':
+        preference_value = bcrypt.hashpw(preference_value.encode(), bcrypt.gensalt()).decode()
+
     connection = sqlite3.connect(DATABASE_FILE)
     cursor = connection.cursor()
 
@@ -72,7 +102,10 @@ def set_preference():
     connection.commit()
     connection.close()
 
-    return jsonify({"message": "Preference set successfully."})
+    if preference_key == 'password':
+        return jsonify({"message": "Password set successfully."})
+    else:
+        return jsonify({"message": "Preference set successfully."})
 
 
 @preferences_blueprint.route('/api/preferences/<int:user_id>/<string:preference_key>', methods=['DELETE'])

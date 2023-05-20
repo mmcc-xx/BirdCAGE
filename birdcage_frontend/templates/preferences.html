@@ -6,18 +6,11 @@
 
 {% block content %}
 
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="my-4">Preferences</h1>
-            </div>
-        </div>
+    <h2 class="my-4">Preferences</h2>
 
     <form id="preferences-form">
         <table>
-            <tr>
-                <th>Preference Key</th>
-                <th>Preference Value</th>
-            </tr>
+
             <tr>
                 <td>Recording Length</td>
                 <td><input type="text" name="recordinglength" value="{{ current_preferences.recordinglength }}"></td>
@@ -52,11 +45,23 @@
             </tr>
         </table>
         <br>
+        Password: <input type="password" id="password"> <br>
         <input type="submit" value="Set Preferences">
     </form>
 
     <div id="message"></div>
+
+    <h2 class="my-4">Change Password</h2>
+    <form id="change-password-form">
+        Current Password: <input type="password" id="current-password" required> <br>
+        New Password: <input type="password" id="new-password" required> <br>
+        Confirm New Password: <input type="password" id="confirm-new-password" required> <br>
+        <input type="submit" value="Change Password">
+    </form>
+    <div id="change-password-message"></div>
+
 {% endblock %}
+
 
 {% block scripts %}
     <script>
@@ -65,11 +70,12 @@
 
             const api_server_url = "{{ api_server_url }}";
             const user_id = 0;
+            const password = document.getElementById('password').value;
             const inputs = document.getElementsByTagName('input');
             let preferences = [];
 
             for (let input of inputs) {
-                if (input.name) {
+                if (input.name && input.id !== "password") {
                     preferences.push({
                         preference_key: input.name,
                         preference_value: input.value,
@@ -77,11 +83,14 @@
                 }
             }
 
+            document.getElementById('message').textContent = '';
+
             for (let preference of preferences) {
                 const response = await fetch(`${api_server_url}/api/preferences`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-Password': password
                     },
                     body: JSON.stringify({
                         user_id,
@@ -90,8 +99,57 @@
                     })
                 });
 
+                let message;
+                if (response.status === 403) {
+                    message = 'Password incorrect';
+                } else if (response.status !== 200) {
+                    const errorData = await response.json();
+                    message = `Error: ${response.status} - ${errorData.error}`;
+                } else {
+                    const data = await response.json();
+                    message = data.message;
+                }
+
+                // Append the message for the current preference with a break
+                document.getElementById('message').innerHTML += `${preference.preference_key}: ${message}<br>`;
+            }
+        });
+
+        document.getElementById('change-password-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const api_server_url = "{{ api_server_url }}";
+            const user_id = 0;
+            const current_password = document.getElementById('current-password').value;
+            const new_password = document.getElementById('new-password').value;
+            const confirm_new_password = document.getElementById('confirm-new-password').value;
+            const change_password_message = document.getElementById('change-password-message');
+
+            if (new_password !== confirm_new_password) {
+                change_password_message.textContent = 'New passwords do not match.';
+                return;
+            }
+
+            const response = await fetch(`${api_server_url}/api/preferences`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Password': current_password
+                },
+                body: JSON.stringify({
+                    user_id,
+                    preference_key: 'password',
+                    preference_value: new_password,
+                })
+            });
+            if (response.status === 403) {
+                document.getElementById('change-password-message').textContent = 'Current password incorrect';
+            } else if (response.status !== 200) {
+                const errorData = await response.json();
+                document.getElementById('change-password-message').textContent = `Error: ${response.status} - ${errorData.error}`;
+            } else {
                 const data = await response.json();
-                document.getElementById('message').textContent += `${preference.preference_key}: ${data.message}\n`;
+                document.getElementById('change-password-message').textContent = data.message;
             }
         });
     </script>

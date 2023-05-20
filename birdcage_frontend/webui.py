@@ -5,7 +5,7 @@ import os
 
 app = Flask(__name__)
 
-API_SERVER_URL = os.environ.get('API_SERVER_URL', 'http://192.168.1.75:7007')
+API_SERVER_URL = os.environ.get('API_SERVER_URL', 'http://192.168.1.75:7006')
 WEBUI_PORT = os.environ.get('WEBUI_PORT', '7009')
 
 @app.route('/')

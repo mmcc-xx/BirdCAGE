@@ -1,6 +1,7 @@
 ![BirdCAGE Screenshot](birdcage.JPG)
 
 # Newest stuff
+- Password control for stream settings and preferences. The default password is 'birdcage'
 - Details page with bigger spectrogram. My camera's audio has a pretty low sample rate, so the big spectrograms 
 look not great. I hope to test with a CD quality (44.1KHz sampling, 16bit samples) source to see if it looks better
 - Made the UI more consistent. Setting preferences and streams is still pretty bad though.
@@ -28,11 +29,13 @@ from the internet, use your reverse proxy to give names to both the front end an
 birdcageapi.yourdomain.com). Add the front end url to CORS_ORIGINS (CORS_ORIGINS: http://192.168.1.75:7008,http://birdcage.yourdomain.com)
 and use back end name for API_SERVER_URL (API_SERVER_URL: http://birdcageapi.yourdomain.com).
 - docker-compose up
-- From the Web UI go to Stream Settings and add a stream. The Name field is for however you want the stream identified in the
+- From the Web UI go to Stream Settings and add a stream. The default password is 'birdcage'. The Name field is for however you want the stream identified in the
 UI. Address is the full url of the stream from your source (try opening it in VLC to make sure it works if you aren't sure).
 Protocol is http, rtmp, or rtsp. Transport is TCP or UDP. This is only important for rtsp because it can use either one.
-- Go to Preferences and set your latitude and longitude and tweak other settings. If you live in Topeka, Kansas you are
+- Go to Preferences and set your latitude and longitude and tweak other settings. The default password is 'birdcage'. 
+If you live in Topeka, Kansas you are
 in luck: your latitude and longitude are already set.
+- Consider changing the default password. Or don't.
 - Did the above not work?
     - See if you can go to whatever you set as your API_SERVER_URL in your browser. You should see a (very incomplete) UI of API documentation.
     If not, the back end / API server is not exposed to the network correctly or the docket-compose file isn't configured correctly. Or both.
@@ -49,6 +52,5 @@ letter or whatever.
 ## To Do
 - Add more features, e.g. block storing recordings of selected species. I don't need any more recordings of Robins.
 - Handle changing streams and preferences without having to kill the app.
-- Some security would probably be good.
 - I'm planning to work on a "sattelite recorder" based on the ESP32 platform. It'll probably need a different interface to upload audio
 to avoid interference between the audio and WiFi.
