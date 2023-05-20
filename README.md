@@ -23,11 +23,15 @@ and analyzing and analysis. A Redis container is used to coordinate the tasks.
 - Go into the BirdNET-Analyzer directory. Do what it says there to get a BirdNET-Analyzer server running.
 - Assuming you are using docker-compose, create a new directory on your server for the application. Put the docker-compose.yml
 file from this repo in there. Create tmp, detections, and db directories in there as well.
-- Edit the docker-compose.yml file to meet your needs. If you just want to view the UI from your intranet via IP addresses,
-all you should have to do is replace 192.168.1.75 with the IP address of your server. If you want to be able to access it
+- Edit the docker-compose.yml file to meet your needs.
+    - If you just want to view the UI from your intranet via IP addresses,
+all you should have to do is replace 192.168.1.75 (in 3 places) with the IP address of your server.
+    - If you want to be able to access it
 from the internet, use your reverse proxy to give names to both the front end and back end (birdcage.yourdomain.com and
-birdcageapi.yourdomain.com). Add the front end url to CORS_ORIGINS (CORS_ORIGINS: http://192.168.1.75:7008,http://birdcage.yourdomain.com)
-and use back end name for API_SERVER_URL (API_SERVER_URL: http://birdcageapi.yourdomain.com).
+birdcageapi.yourdomain.com). Add the front end url to CORS_ORIGINS (e.g. CORS_ORIGINS: http://192.168.1.75:7008,http://birdcage.yourdomain.com)
+and use back end name for API_SERVER_URL (e.g. API_SERVER_URL: http://birdcageapi.yourdomain.com).
+    - The ANALYZE_SERVER is the address for the BirdNET-Analyzer server you set up above. It can be an internal address - client
+code never talks to it directly
 - docker-compose up
 - From the Web UI go to Stream Settings and add a stream. The default password is 'birdcage'. The Name field is for however you want the stream identified in the
 UI. Address is the full url of the stream from your source (try opening it in VLC to make sure it works if you aren't sure).
