@@ -24,7 +24,6 @@ services:
       REDIS_PORT: 6379
     tmpfs:
       - /tmp:size=16M
-      - /var/log
     volumes:
       - "./detections:/detections"
       - "./db:/db"
