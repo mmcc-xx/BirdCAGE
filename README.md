@@ -30,7 +30,7 @@ all you should have to do is replace 192.168.1.75 (in 3 places) with the IP addr
 from the internet, use your reverse proxy to give names to both the front end and back end (birdcage.yourdomain.com and
 birdcageapi.yourdomain.com). Add the front end url to CORS_ORIGINS (e.g. CORS_ORIGINS: http://192.168.1.75:7008,http://birdcage.yourdomain.com)
 and use back end name for API_SERVER_URL (e.g. API_SERVER_URL: http://birdcageapi.yourdomain.com).
-    - The ANALYZE_SERVER is the address for the BirdNET-Analyzer server you set up above. It can be an internal address - client
+    - ANALYZE_SERVER is the address for the BirdNET-Analyzer server you set up above. It can be an internal address - client
 code never talks to it directly
 - docker-compose up
 - From the Web UI go to Stream Settings and add a stream. The default password is 'birdcage'. The Name field is for however you want the stream identified in the
