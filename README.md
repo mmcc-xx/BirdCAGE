@@ -22,7 +22,7 @@ and analyzing and analysis. A Redis container is used to coordinate the tasks.
 ## Here's what you're gonna do
 - Go into the BirdNET-Analyzer directory. Do what it says there to get a BirdNET-Analyzer server running.
 - Assuming you are using docker-compose, create a new directory on your server for the application. Put the docker-compose.yml
-file from this repo in there. Create tmp, detections, and db directories in there as well.
+file from this repo in there. Create detections and db directories in there as well.
 - Edit the docker-compose.yml file to meet your needs.
     - If you just want to view the UI from your intranet via IP addresses,
 all you should have to do is replace 192.168.1.75 (in 3 places) with the IP address of your server.
