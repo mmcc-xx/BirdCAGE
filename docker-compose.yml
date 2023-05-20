@@ -22,8 +22,10 @@ services:
       CORS_ORIGINS: http://192.168.1.75:7008
       REDIS_SERVER: redis
       REDIS_PORT: 6379
+    tmpfs:
+      - /tmp:size=16M
+      - /var/log
     volumes:
-      - "./tmp:/tmp"
       - "./detections:/detections"
       - "./db:/db"
       - "/etc/localtime:/etc/localtime:ro"
