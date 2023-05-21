@@ -1,11 +1,12 @@
 ![BirdCAGE Screenshot](birdcage.JPG)
 
 # Newest stuff
+- Had to make another change to BirdNET-Analyze. This time I had to change two of their Python files so I could
+get a list of likely species and likelyhood scores for a given lat/long and week. I'm not utilizing it in the
+BirdCAGE app yet but I intend to.
 - Password control for stream settings and preferences. The default password is 'birdcage'
 - Details page with bigger spectrogram. My camera's audio has a pretty low sample rate, so the big spectrograms 
 look not great. I hope to test with a CD quality (44.1KHz sampling, 16bit samples) source to see if it looks better
-- Made the UI more consistent. Setting preferences and streams is still pretty bad though.
-- Just in as of 11:49 eastern US time on May 19th, dynamically generated tiny spectrograms. So neat.
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide

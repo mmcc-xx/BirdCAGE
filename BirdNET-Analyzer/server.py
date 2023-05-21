@@ -118,6 +118,29 @@ def healthcheck():
     return json.dumps(data)
 
 
+@bottle.route('/predictedspecies')
+def predicted_species():
+    # Extract the input parameters from the query string
+    latitude = float(bottle.request.query.get('latitude'))
+    longitude = float(bottle.request.query.get('longitude'))
+    week_number = int(bottle.request.query.get('week_number'))
+    sf_thresh = float(bottle.request.query.get('sf_thresh'))
+
+    cfg.LATITUDE = latitude
+    cfg.LONGITUDE = longitude
+    cfg.WEEK = week_number
+    cfg.LOCATION_FILTER_THRESHOLD = sf_thresh
+
+    specieslistwithscores = analyze.predictSpeciesListWithScore()
+
+    # Convert the data to a JSON string
+    species_list_json = json.dumps(specieslistwithscores)
+
+    # Set the 'Content-Type' header to 'application/json' and return the JSON data
+    bottle.response.content_type = 'application/json'
+    return species_list_json
+
+
 @bottle.route('/getlabels')
 def get_labels():
     file_path = os.path.join('checkpoints', 'V2.3', 'BirdNET_GLOBAL_3K_V2.3_Labels.txt')
