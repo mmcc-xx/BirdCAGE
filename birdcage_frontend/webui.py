@@ -46,5 +46,16 @@ def preferences():
 def show_detection_details(detection_id):
     return render_template('detection_details.html', detection_id=detection_id, api_server_url=API_SERVER_URL)
 
+
+@app.route('/birdsoftheweek')
+def birds_of_the_week():
+    return render_template('birdsoftheweek.html', api_server_url=API_SERVER_URL)
+
+
+@app.route('/detectionfilters')
+def detectionfilters():
+    return render_template('detectionfilters.html', api_server_url=API_SERVER_URL)
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(WEBUI_PORT))

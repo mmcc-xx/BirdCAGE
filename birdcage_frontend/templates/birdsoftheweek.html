@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}
+Vos oiseaux de la semaine
+{% endblock %}
+
+{% block content %}
+<h1>Vos oiseaux de la semaine</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Scientific Name</th>
+            <th scope="col">Common Name</th>
+            <th scope="col">Occurrence</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for bird in birds %}
+        <tr>
+            <td>{{ bird.scientific_name }}</td>
+            <td>{{ bird.common_name }}</td>
+            <td>{{ bird.occurrence }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Fetch the data and populate the table
+        fetch("{{ api_server_url }}/api/filters/birdsoftheweek")
+            .then(response => response.json())
+            .then(data => {
+                for (const item of data) {
+                    const [scientific_name, common_name] = item[0].split('_');
+                    const occurrence = item[1].toFixed(3);  // Format the occurrence value with 3 decimal places
+                    $('tbody').append(`<tr><td>${scientific_name}</td><td>${common_name}</td><td>${occurrence}</td></tr>`);
+                }
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    });
+</script>
+{% endblock %}
+
