@@ -2,7 +2,7 @@
 
 # Newest stuff
 - I added functionality for setting up detection filters. I have not yet implemented the detection filters though.
-    - As part of that you can see the birds the models thinks are likely to be around at your location this week.
+    - As part of that you can see the birds the model thinks are likely to be around at your location this week.
     - Titled in French because I like the word "oiseaux".
 - Had to make another change to BirdNET-Analyze. This time I had to change two of their Python files so I could
 get a list of likely species and likelyhood scores for a given lat/long and week. I'm not utilizing it in the
