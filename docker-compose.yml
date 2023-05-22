@@ -23,7 +23,7 @@ services:
       REDIS_SERVER: redis
       REDIS_PORT: 6379
     tmpfs:
-      - /tmp:size=16M
+      - /tmp:size=16M #you might want to increase this size if you are recording a bunch of streams, if you streams are particularly hi-res, or if your analyzer might be periodically unavailable
     volumes:
       - "./detections:/detections"
       - "./db:/db"
