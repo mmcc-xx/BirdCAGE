@@ -15,10 +15,17 @@ import requests
 from app.models.recording_metadata import set_metadata, get_metadata_by_filename, delete_metadata_by_filename
 import glob
 from pydub import AudioSegment
+from .filter_functions import update_birdsoftheweek_table, create_birdsoftheweek_table, getaction
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 DETECTION_DIR = os.path.join(basedir, '..', DETECTION_DIR_NAME)
 TEMP_DIR = os.path.join(basedir, '..', TEMP_DIR_NAME)
+
+
+@shared_task(name='update_birdsoftheweek_table_task')
+def update_birdsoftheweek_table_task():
+    update_birdsoftheweek_table()
+
 
 def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filename):
     try:
@@ -70,7 +77,7 @@ def record_stream(stream, preferences):
 
         if result['status'] == 'success':
             # The recording was successful
-            print(f"Recording successful. File saved to: {result['filepath']}")
+            print(f"Recording successful. File saved to: {result['filepath']}", flush=True)
             set_metadata(os.path.basename(tmp_filename),
                          stream_id, name, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
@@ -85,7 +92,7 @@ def record_stream(stream, preferences):
 def sendRequest(fpath, mdata):
     url = 'http://{}:{}/analyze'.format(ANALYZE_SERVER, ANALYZE_PORT)
 
-    print('Requesting analysis for {}'.format(fpath))
+    print('Requesting analysis for {}'.format(fpath), flush=True)
 
     # Make payload
     multipart_form_data = {
@@ -112,7 +119,6 @@ def check_results(results, filepath, recording_metadata, preferences):
     wav_audio = AudioSegment.from_wav(filepath)
 
     for time_interval in results:
-        print(f"Time interval: {time_interval}")
         interval_results = results[time_interval]
 
         # Split the time_interval string into start and end times
@@ -129,13 +135,19 @@ def check_results(results, filepath, recording_metadata, preferences):
             # Split the species name into scientific and common names
             scientific_name, common_name = species.split('_', 1)
 
-            print(
-                f"  Scientific name: {scientific_name}, Common name: {common_name}, Confidence score: {confidence_score}",
-                flush=True)
+            # figure out what we're supposed to do with a detection of this species
+            detectionaction = getaction(scientific_name)
 
-            if confidence_score > confidence_target:
+            if (confidence_score > confidence_target) and (detectionaction == 'ignore'):
+                print("Detected and ignoring: " + common_name, flush=True)
+
+            # ignore if we're supposed to ignore
+            if (confidence_score > confidence_target) and (detectionaction != 'ignore'):
                 # Trim the wav file to the interval and save as mp3 if not already saved
-                if not mp3_saved:
+                print("Detected: " + common_name + " Action: " + detectionaction, flush=True)
+
+                # only save mp3 if acton is record or alert
+                if (not mp3_saved) and (detectionaction == 'record' or detectionaction == 'alert'):
                     # Generate a UUID for the mp3 filename
 
                     recordinglength = int(preferences['recordinglength'])
@@ -157,8 +169,19 @@ def check_results(results, filepath, recording_metadata, preferences):
                 timestamp = recording_metadata['timestamp']
                 stream_id = recording_metadata['stream_id']
                 streamname = recording_metadata['streamname']
-                add_detection(timestamp, stream_id, streamname, scientific_name, common_name, confidence_score,
+
+                # don't store an mp3 file name if detectionaction is 'log' even if there happens to already be a recording
+                # from this interval
+                if detectionaction == 'log':
+                    add_detection(timestamp, stream_id, streamname, scientific_name, common_name, confidence_score,
+                                  '')
+                else: # if detection action is record or alert
+                    add_detection(timestamp, stream_id, streamname, scientific_name, common_name, confidence_score,
                               mp3_filename)
+
+                if detectionaction == 'alert':
+                    # to be replaced when alert functionality is added
+                    print('Oh my god its a ' + scientific_name + ' better known as a ' + common_name)
 
 
 @shared_task()
@@ -225,7 +248,7 @@ def analyze_recordings():
 
                 analysis = sendRequest(file_path, json.dumps(mdata))
                 if analysis['msg'] == 'success':
-                    print(analysis, flush=True)
+                    # print(analysis, flush=True)
                     check_results(analysis['results'], file_path, recording_metadata, preferences)
 
                     # That file has been analyzed and results stored. Delete it and its metadata record
@@ -240,6 +263,10 @@ def analyze_recordings():
 
 
 def process_streams():
+
+    # initialize the table of expected birds
+    create_birdsoftheweek_table()
+    update_birdsoftheweek_table()
 
     streams = get_streams_list()
 

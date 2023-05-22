@@ -1,8 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
 from celery import Celery
+from celery.schedules import crontab
 from .celery_config import broker_url, result_backend
-from .stream_processing import process_streams
+from .stream_processing import process_streams, update_birdsoftheweek_table_task
 from app.views.streams import streams_blueprint
 from app.views.preferences import preferences_blueprint
 from app.views.audio_files import audio_files_blueprint
@@ -33,6 +34,15 @@ def create_app(init_celery=True):
         app.config['CELERY_BROKER_URL'] = broker_url
         app.config['CELERY_RESULT_BACKEND'] = result_backend
         app.celery = make_celery(app)
+
+        # Add the Celery schedule configuration
+        app.celery.conf.beat_schedule = {
+            'weekly-update-birdsoftheweek-table': {
+                'task': update_birdsoftheweek_table_task.name,
+                'schedule': crontab(day_of_week=0, hour=0, minute=0),
+            },
+        }
+
         # start recording and processing streams
         process_streams()
 

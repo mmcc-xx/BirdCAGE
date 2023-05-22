@@ -115,4 +115,3 @@ def add_remove_override(user_id):
             return jsonify({"error": "Override not found"}), 404
 
     connection.close()
-

@@ -1,15 +1,23 @@
 ![BirdCAGE Screenshot](birdcage.JPG)
 
 # Newest stuff
+- Filtering has been implemented. There are four "priorities" of detections: Ignore, Log, Record and Alert. If a bird
+has been configured to be Ignored, it isn't even noted in the database. If Log, it is logged, but no audio is stored.
+If Record, it logs and stores the MP3. If Alert... well I haven't implemented that yet. There are two ways to configure
+the classifications:
+    - Method 1 is by setting thresholds based on the expected occurrence level. These levels come from the model. Click
+the Birds of the Week link to see what birds are expected at your Lat/Long and the current week to get an idea of where
+to set the threshold levels
+    - Method 2 is be setting manual overrides. This takes precedence over Method 1. Add species by scientific name to
+the override list and if you set a specific species to be Ignored, by gum it will be ignored. I added Campephilus
+principalis to mine - lord knows I have enough recording of them already.
 - I added functionality for setting up detection filters. I have not yet implemented the detection filters though.
     - As part of that you can see the birds the model thinks are likely to be around at your location this week.
     - Titled in French because I like the word "oiseaux".
 - Had to make another change to BirdNET-Analyze. This time I had to change two of their Python files so I could
-get a list of likely species and likelyhood scores for a given lat/long and week. I'm not utilizing it in the
+get a list of likely species and likelihood scores for a given lat/long and week. I'm not utilizing it in the
 BirdCAGE app yet but I intend to.
 - Password control for stream settings and preferences. The default password is 'birdcage'. The UX is terrible.
-- Details page with bigger spectrogram. My camera's audio has a pretty low sample rate, so the big spectrograms 
-look not great. I hope to test with a CD quality (44.1KHz sampling, 16bit samples) source to see if it looks better
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide

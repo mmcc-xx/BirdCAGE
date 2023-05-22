@@ -234,8 +234,8 @@ def get_detections_by_day_and_hour(date):
     """, (date,))
 
     data = cursor.fetchall()
-    print("here's data in count_by_hour:")
-    print(data, flush=True)
+    # print("here's data in count_by_hour:")
+    # print(data, flush=True)
 
     # Convert the tuples to dictionaries
     results = [

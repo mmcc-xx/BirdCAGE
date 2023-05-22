@@ -42,7 +42,7 @@ Detection Filters
             </div>
             <div class="col-md-4">
                 <label for="record-alert-threshold" class="form-label">Record / Alert Threshold</label>
-                <input type="number" class="form-control" id="record-alert-threshold" name="record_alert_threshold" step="0.01" min="0" max="1" required>
+                <input type="number" class="form-control" id="record-alert-threshold" name="recordalert_threshold" step="0.01" min="0" max="1" required>
                 <!-- Add note under Record / Alert Threshold -->
                 <small class="form-text text-muted">Species with an occurrence value higher than this but lower than the Log Threshold will be logged and the detection recordings will be stored. Species with an occurrence value lower than this will be logged, recordings will be stored, and an alert will be sent.</small>
             </div>
@@ -213,7 +213,7 @@ Detection Filters
                 return obj;
             }, {});
 
-            $.post(`${API_SERVER_URL}/filters/thresholds/${USER_ID}`, formData)
+            $.post(`${API_SERVER_URL}/api/filters/thresholds/${USER_ID}`, formData)
                 .done(function () {
                     fetchThresholds();
                 })

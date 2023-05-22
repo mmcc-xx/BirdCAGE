@@ -116,20 +116,24 @@
                             row.appendChild(cell);
                         });
 
-                        // Add audio player widget
+                        // Add audio player cell
                         const audioCell = document.createElement('td');
-                        audioCell.classList.add('d-none', 'd-md-table-cell'); // Add classes here
-                        const audioPlayer = document.createElement('audio');
-                        audioPlayer.controls = true;
-                        audioPlayer.src = `${API_SERVER_URL}/api/audio-files/${detection[7]}`;
-                        audioCell.appendChild(audioPlayer);
+                        audioCell.classList.add('d-none', 'd-md-table-cell');
+                        if (detection[7]) {
+                            const audioPlayer = document.createElement('audio');
+                            audioPlayer.controls = true;
+                            audioPlayer.src = `${API_SERVER_URL}/api/audio-files/${detection[7]}`;
+                            audioCell.appendChild(audioPlayer);
+                        }
                         row.appendChild(audioCell);
 
-                        // Add image widget
+                        // Add image cell
                         const imageCell = document.createElement('td');
-                        const imageElement = document.createElement('img');
-                        imageElement.src = `${API_SERVER_URL}/api/spectrogram/thumb/${detection[7]}.png`;
-                        imageCell.appendChild(imageElement);
+                        if (detection[7]) {
+                            const imageElement = document.createElement('img');
+                            imageElement.src = `${API_SERVER_URL}/api/spectrogram/thumb/${detection[7]}.png`;
+                            imageCell.appendChild(imageElement);
+                        }
                         row.appendChild(imageCell);
 
                         // Add event listener to navigate to detection details page

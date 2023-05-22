@@ -74,17 +74,21 @@
 
                         // Add audio player widget
                         const audioCell = document.createElement('td');
-                        const audioPlayer = document.createElement('audio');
-                        audioPlayer.controls = true;
-                        audioPlayer.src = `${API_SERVER_URL}/api/audio-files/${detection.filename}`;
-                        audioCell.appendChild(audioPlayer);
+                        if (detection.filename) {
+                            const audioPlayer = document.createElement('audio');
+                            audioPlayer.controls = true;
+                            audioPlayer.src = `${API_SERVER_URL}/api/audio-files/${detection.filename}`;
+                            audioCell.appendChild(audioPlayer);
+                        }
                         row.appendChild(audioCell);
 
                         // Add image widget
                         const imageCell = document.createElement('td');
-                        const imageElement = document.createElement('img');
-                        imageElement.src = `${API_SERVER_URL}/api/spectrogram/thumb/${detection.filename}.png`;
-                        imageCell.appendChild(imageElement);
+                        if (detection.filename) {
+                            const imageElement = document.createElement('img');
+                            imageElement.src = `${API_SERVER_URL}/api/spectrogram/thumb/${detection.filename}.png`;
+                            imageCell.appendChild(imageElement);
+                        }
                         row.appendChild(imageCell);
 
                         // Add event listener to navigate to detection details page
