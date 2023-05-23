@@ -1,6 +1,7 @@
 ![BirdCAGE Screenshot](birdcage.JPG)
 
 # Newest stuff
+(listed newest first)
 - Filtering has been implemented. There are four "priorities" of detections: Ignore, Log, Record and Alert. If a bird
 has been configured to be Ignored, it isn't even noted in the database. If Log, it is logged, but no audio is stored.
 If Record, it logs and stores the MP3. If Alert... well I haven't implemented that yet. There are two ways to configure
