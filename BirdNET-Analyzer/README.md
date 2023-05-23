@@ -1,3 +1,8 @@
+# A change was recently made in the BirdNET-Analyzer repo that broke the integration.
+Later today (May 23) I'll push a known good image and change the docker-compose in the main directory to use it.
+
+So don't bother doing the stuff below. It won't work.
+
 # Here's what you're gonna do...
 
 - clone the BirdNET-Analyzer repo https://github.com/kahst/BirdNET-Analyzer
