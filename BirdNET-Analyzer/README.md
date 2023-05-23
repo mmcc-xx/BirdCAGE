@@ -1,7 +1,6 @@
 # A change was recently made in the BirdNET-Analyzer repo that broke the integration.
-Later today (May 23) I'll push a known good image and change the docker-compose in the main directory to use it.
-
-So don't bother doing the stuff below. It won't work.
+The docker-compose.yml now uses an image that I pushed that I know to work. So, don't bother with
+the steps below.
 
 # Here's what you're gonna do...
 

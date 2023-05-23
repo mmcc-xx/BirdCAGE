@@ -2,23 +2,10 @@
 
 # Newest stuff
 (listed newest first)
-- Filtering has been implemented. There are four "priorities" of detections: Ignore, Log, Record and Alert. If a bird
-has been configured to be Ignored, it isn't even noted in the database. If Log, it is logged, but no audio is stored.
-If Record, it logs and stores the MP3. If Alert... well I haven't implemented that yet. There are two ways to configure
-the classifications:
-    - Method 1 is by setting thresholds based on the expected occurrence level. These levels come from the model. Click
-the Birds of the Week link to see what birds are expected at your Lat/Long and the current week to get an idea of where
-to set the threshold levels
-    - Method 2 is be setting manual overrides. This takes precedence over Method 1. Add species by scientific name to
-the override list and if you set a specific species to be Ignored, by gum it will be ignored. I added Campephilus
-principalis to mine - lord knows I have enough recording of them already.
-- I added functionality for setting up detection filters. I have not yet implemented the detection filters though.
-    - As part of that you can see the birds the model thinks are likely to be around at your location this week.
-    - Titled in French because I like the word "oiseaux".
-- Had to make another change to BirdNET-Analyze. This time I had to change two of their Python files so I could
-get a list of likely species and likelihood scores for a given lat/long and week. I'm not utilizing it in the
-BirdCAGE app yet but I intend to.
-- Password control for stream settings and preferences. The default password is 'birdcage'. The UX is terrible.
+- I pushed an image of the BirdNET-Analyzer including my patches. The docker-compose file now refers to that image, so installation
+should be more straightforward.
+- Apparently multiple streams aren't working. I never tested it - just assumed it would work. Weird how that never works out.
+Stand by for a fix.
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide
@@ -33,7 +20,6 @@ application. The front end provides the UI. The back end application uses celery
 and analyzing and analysis. A Redis container is used to coordinate the tasks.
 
 ## Here's what you're gonna do
-- Go into the BirdNET-Analyzer directory. Do what it says there to get a BirdNET-Analyzer server running.
 - Assuming you are using docker-compose, create a new directory on your server for the application. Put the docker-compose.yml
 file from this repo in there. Create detections and db directories in there as well.
 - Edit the docker-compose.yml file to meet your needs.
@@ -43,8 +29,9 @@ all you should have to do is replace 192.168.1.75 (in 3 places) with the IP addr
 from the internet, use your reverse proxy to give names to both the front end and back end (birdcage.yourdomain.com and
 birdcageapi.yourdomain.com). Add the front end url to CORS_ORIGINS (e.g. CORS_ORIGINS: http://192.168.1.75:7008,http://birdcage.yourdomain.com)
 and use back end name for API_SERVER_URL (e.g. API_SERVER_URL: http://birdcageapi.yourdomain.com).
-    - ANALYZE_SERVER is the address for the BirdNET-Analyzer server you set up above. It can be an internal address - client
-code never talks to it directly
+    - ANALYZE_SERVER should the IP address of your server, and ANALYZE_PORT should be the port that is being mapped. 
+to 8080 in the birdnetserver service section. (In theory interactions with the birdnetserver could all be on the virtual 
+network. I need to try that out. For now, use a LAN address)
 - docker-compose up
 - From the Web UI go to Stream Settings and add a stream. The default password is 'birdcage'. The Name field is for however you want the stream identified in the
 UI. Address is the full url of the stream from your source (try opening it in VLC to make sure it works if you aren't sure).
