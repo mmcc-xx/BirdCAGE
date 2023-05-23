@@ -30,6 +30,8 @@ services:
       CORS_ORIGINS: http://192.168.1.75:7008
       REDIS_SERVER: redis
       REDIS_PORT: 6379
+      CONCURRENCY: 10 # this many processes will get started up to handle concurrent tasks. The app needs (number of streams) + 2?
+                      # I think? Maybe +3? Look, I don't really know what I'm doing here.
     tmpfs:
       - /tmp:size=16M #you might want to increase this size if you are recording a bunch of streams, if your
                       # streams are particularly hi-res, or if your analyzer might be periodically unavailable
