@@ -13,7 +13,7 @@ COPY webui.py /
 COPY static /static
 COPY templates /templates
 
-ENV API_SERVER_URL=http://192.168.1.75 \
+ENV API_SERVER_URL=http://127.0.0.1 \
     WEBUI_PORT=7008
 
 # Grant execution permission to start_app.sh

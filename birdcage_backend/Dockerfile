@@ -19,11 +19,11 @@ COPY app /app
 ENV DATABASE_FILE=/db/birdcage.db \
     API_SERVER_PORT=7007 \
     TEMP_DIR_NAME=tmp \
-    ANALYZE_SERVER=192.168.1.75 \
-    ANALYZE_PORT=7667 \
+    ANALYZE_SERVER=127.0.0.1 \
+    ANALYZE_PORT=8080 \
     DETECTION_DIR_NAME=detections \
-    CORS_ORIGINS=http://192.168.1.75:7008 \
-    REDIS_SERVER=192.168.1.75 \
+    CORS_ORIGINS=http://127.0.0.1:7008 \
+    REDIS_SERVER=127.0.0.1 \
     REDIS_PORT=6379
 
 # Grant execution permission to start_app.sh

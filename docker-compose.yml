@@ -2,38 +2,20 @@ version: '3.8'
 
 services:
 
-  # This is an image based on BirdNET-Analyzer with a couple of patches applied. I hope to be able to replace this
-  # with an image they maintain in the future
-  birdnetserver:
-    restart: unless-stopped
-    image: mmcc73/birdnetserver:latest
-    ports:
-      - "7667:8080"
-
-  redis:
-    image: "redis:latest" #the redis server doesn't need to be exposed outside the virtual network, so no "ports"
-                          #mapping is needed
-    networks:
-      - birdcage_net
-
   birdcage_backend:
     image: "mmcc73/birdcage_backend:latest"
+    container_name: birdcage_backend
     ports:
       - "7007:7007"
     environment:
-      DATABASE_FILE: /db/birdcage.db
-      API_SERVER_PORT: 7007
-      TEMP_DIR_NAME: tmp
-      ANALYZE_SERVER: 192.168.1.75
-      ANALYZE_PORT: 7667
-      DETECTION_DIR_NAME: detections
-      CORS_ORIGINS: http://192.168.1.75:7008
-      REDIS_SERVER: redis
-      REDIS_PORT: 6379
       CONCURRENCY: 10 # this many processes will get started up to handle concurrent tasks. The app needs (number of streams) + 2?
                       # I think? Maybe +3? Look, I don't really know what I'm doing here.
+      DETECTION_DIR_NAME: detections
+      CORS_ORIGINS: http://birdcage_frontend:7008
+      ANALYZE_SERVER: birdnetserver
+      ANALYZE_PORT: 8080
     tmpfs:
-      - /tmp:size=16M #you might want to increase this size if you are recording a bunch of streams, if your
+      - /tmp:size=32M # you might want to increase this size if you are recording a bunch of streams, if your
                       # streams are particularly hi-res, or if your analyzer might be periodically unavailable
     volumes:
       - "./detections:/detections"
@@ -47,16 +29,31 @@ services:
 
   birdcage_frontend:
     image: "mmcc73/birdcage_frontend:latest"
+    container_name: birdcage_frontend
     ports:
       - "7008:7008"
     environment:
-      API_SERVER_URL: http://192.168.1.75:7007
-      WEBUI_PORT: 7008
+      API_SERVER_URL: http://birdcage_backend:7007
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/etc/timezone:/etc/timezone:ro"
     depends_on:
       - birdcage_backend
+    networks:
+      - birdcage_net
+
+  # This is an image based on BirdNET-Analyzer with a couple of patches applied. I hope to be able to replace this
+  # with an image they maintain in the future
+  birdnetserver:
+    restart: unless-stopped
+    container_name: birdnetserver
+    image: mmcc73/birdnetserver:latest
+    networks:
+      - birdcage_net
+
+  redis:
+    image: "redis:latest"
+    restart: unless-stopped
     networks:
       - birdcage_net
 
