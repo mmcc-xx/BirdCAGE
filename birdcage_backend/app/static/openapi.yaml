@@ -228,6 +228,33 @@ paths:
                 items:
                   $ref: '#/components/schemas/Detection'
 
+  /api/detections/by_common_name/{date}/{common_name}:
+    get:
+      summary: Retrieve all detections for a given day for a given common_name
+      parameters:
+        - name: date
+          in: path
+          description: Date for which detections should be retrieved (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: common_name
+          in: path
+          description: Common name to filter the detections
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detections for the given day and common_name retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Detection'
+
   /api/detections/date/{date}:
     get:
       summary: Retrieve all detections for a given day
