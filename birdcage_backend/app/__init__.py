@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from celery import Celery
 from celery.schedules import crontab
@@ -14,7 +15,7 @@ from app.models.preferences import create_preferences_table
 from app.models.recording_metadata import create_recording_metadata_table
 from app.models.detections import create_detections_table
 from app.models.filters import create_filters_tables
-from config import CORS_ORIGINS
+from config import CORS_ORIGINS, JWT_SECRET_KEY
 
 
 def create_app(init_celery=True):
@@ -48,6 +49,11 @@ def create_app(init_celery=True):
 
     else:
         # Register blueprint
+
+        app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY  # Replace with your own secret key
+
+        jwt = JWTManager(app)
+
         app.register_blueprint(streams_blueprint)
         app.register_blueprint(preferences_blueprint)
         app.register_blueprint(audio_files_blueprint)

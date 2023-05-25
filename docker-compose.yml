@@ -32,6 +32,7 @@ services:
       REDIS_PORT: 6379
       CONCURRENCY: 10 # this many processes will get started up to handle concurrent tasks. The app needs (number of streams) + 2?
                       # I think? Maybe +3? Look, I don't really know what I'm doing here.
+      JWT_SECRET_KEY: TheseAreTheTimesThatTryMensSouls #this is used to sign tokens, so use your own Enlightenment philosopher quote
     tmpfs:
       - /tmp:size=16M #you might want to increase this size if you are recording a bunch of streams, if your
                       # streams are particularly hi-res, or if your analyzer might be periodically unavailable

@@ -1,4 +1,4 @@
-{% extends "base.html" %}  
+{% extends "protected.html" %}
   
 {% block title %}  
 Detection Filters
@@ -189,9 +189,14 @@ Detection Filters
 
 
     function removeOverride(speciesName) {
+        const jwt_token = localStorage.getItem("jwt_token");
         $.ajax({
             url: `${API_SERVER_URL}/api/filters/overrides/${USER_ID}`,
             method: 'DELETE',
+            headers: {
+                        // Include the token in the Authorization header
+                        'Authorization': `Bearer ${jwt_token}`
+            },
             data: {
                 species_name: speciesName
             },
@@ -208,32 +213,59 @@ Detection Filters
 
         $('#thresholds-form').submit(function (event) {
             event.preventDefault();
-            const formData = $(this).serializeArray().reduce(function (obj, item) {
-                obj[item.name] = item.value;
-                return obj;
-            }, {});
+            const formData = $(this).serialize(); // Use serialize() instead of serializeArray()
 
-            $.post(`${API_SERVER_URL}/api/filters/thresholds/${USER_ID}`, formData)
-                .done(function () {
+            const jwt_token = localStorage.getItem("jwt_token");
+
+            $.ajax({
+                url: `${API_SERVER_URL}/api/filters/thresholds/${USER_ID}`,
+                method: "POST",
+                data: formData, // Pass the serialized form data directly
+                contentType: 'application/x-www-form-urlencoded',
+                //contentType: "application/json",
+                headers: {
+                    'Authorization': `Bearer ${jwt_token}`
+                },
+                success: function () {
                     fetchThresholds();
-                })
-                .fail(function (jqXHR) {
+                },
+                error: function (jqXHR) {
                     if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
                         showError(jqXHR.responseJSON.error);
                     } else {
                         showError("Failed to update thresholds");
                     }
-                });
-        });
-
-        $('#overrides-form').submit(function(event) {
-            event.preventDefault();
-            const formData = $(this).serialize();
-
-            $.post(`${API_SERVER_URL}/api/filters/overrides/${USER_ID}`, formData, function() {
-                fetchOverrides();
+                }
             });
         });
+
+
+        $('#overrides-form').submit(function (event) {
+            event.preventDefault();
+            const formData = $(this).serialize();
+            const jwt_token = localStorage.getItem("jwt_token");
+
+            $.ajax({
+                url: `${API_SERVER_URL}/api/filters/overrides/${USER_ID}`,
+                method: "POST",
+                data: formData,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': `Bearer ${jwt_token}`
+                },
+                success: function () {
+                    fetchOverrides();
+                },
+                error: function (jqXHR) {
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
+                        showError(jqXHR.responseJSON.error);
+                    } else {
+                        showError("Failed to update overrides");
+                    }
+                }
+            });
+        });
+
     });
 </script>
 {% endblock %}

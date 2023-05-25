@@ -57,5 +57,10 @@ def detectionfilters():
     return render_template('detectionfilters.html', api_server_url=API_SERVER_URL)
 
 
+@app.route("/login", methods=["GET"])
+def login():
+    return render_template("login.html", api_server_url=API_SERVER_URL)
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(WEBUI_PORT))

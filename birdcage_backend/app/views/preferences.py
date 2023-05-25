@@ -4,20 +4,34 @@ from config import DATABASE_FILE
 from ..models.preferences import check_password
 from functools import wraps
 import bcrypt
+from flask_jwt_extended import create_access_token
+from app.decorators import admin_required
 
 preferences_blueprint = Blueprint('preferences', __name__)
 
 
-def password_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        password_input = request.headers.get('X-Password')
-        if password_input is None:
-            return jsonify({"error": "Password header is missing"}), 401
-        if not check_password(password_input):
-            return jsonify({"error": "Invalid password"}), 403
-        return f(*args, **kwargs)
-    return decorated_function
+@preferences_blueprint.route('/api/login', methods=['POST'])
+def login():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    if not username or not password:
+        return jsonify({"msg": "Missing username or password"}), 400
+
+        # Validate the admin user and password (replace with your own validation logic)
+    if username != 'admin' or not check_password(password):
+        return jsonify({"msg": "Invalid username or password"}), 401
+
+        # Create a JWT token
+    # Add print statements to debug the username variable
+    print(f"Type of username: {type(username)}")
+    print(f"Value of username: {username}")
+    access_token = create_access_token(identity=username)
+
+    return jsonify(access_token=access_token), 200
 
 
 @preferences_blueprint.route('/api/preferences/<int:user_id>', methods=['GET'])
@@ -75,7 +89,7 @@ def validate_preference(preference_key, preference_value):
 
 
 @preferences_blueprint.route('/api/preferences', methods=['POST'])
-@password_required
+@admin_required
 def set_preference():
     data = request.get_json()
 
@@ -109,6 +123,7 @@ def set_preference():
 
 
 @preferences_blueprint.route('/api/preferences/<int:user_id>/<string:preference_key>', methods=['DELETE'])
+@admin_required
 def delete_preference(user_id, preference_key):
     connection = sqlite3.connect(DATABASE_FILE)
     cursor = connection.cursor()

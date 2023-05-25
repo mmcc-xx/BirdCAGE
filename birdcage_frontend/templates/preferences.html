@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "protected.html" %}
 
 {% block title %}
   Preferences
@@ -45,7 +45,6 @@
             </tr>
         </table>
         <br>
-        Password: <input type="password" id="password"> <br>
         <input type="submit" value="Set Preferences">
     </form>
 
@@ -70,12 +69,14 @@
 
             const api_server_url = "{{ api_server_url }}";
             const user_id = 0;
-            const password = document.getElementById('password').value;
             const inputs = document.getElementsByTagName('input');
             let preferences = [];
 
+            // Retrieve the JWT token from the localStorage
+            const jwt_token = localStorage.getItem("jwt_token");
+
             for (let input of inputs) {
-                if (input.name && input.id !== "password") {
+                if (input.name) {
                     preferences.push({
                         preference_key: input.name,
                         preference_value: input.value,
@@ -90,7 +91,8 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Password': password
+                        // Include the token in the Authorization header
+                        'Authorization': `Bearer ${jwt_token}`
                     },
                     body: JSON.stringify({
                         user_id,
@@ -100,9 +102,7 @@
                 });
 
                 let message;
-                if (response.status === 403) {
-                    message = 'Password incorrect';
-                } else if (response.status !== 200) {
+                if (response.status !== 200) {
                     const errorData = await response.json();
                     message = `Error: ${response.status} - ${errorData.error}`;
                 } else {
@@ -130,11 +130,14 @@
                 return;
             }
 
+            const jwt_token = localStorage.getItem("jwt_token");
+
             const response = await fetch(`${api_server_url}/api/preferences`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-Password': current_password
+                        'Content-Type': 'application/json',
+                        // Include the token in the Authorization header
+                        'Authorization': `Bearer ${jwt_token}`
                 },
                 body: JSON.stringify({
                     user_id,

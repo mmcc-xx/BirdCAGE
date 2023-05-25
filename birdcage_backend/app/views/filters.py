@@ -4,6 +4,7 @@ from datetime import datetime
 from config import DATABASE_FILE, ANALYZE_SERVER, ANALYZE_PORT
 from app.models.preferences import get_all_user_preferences
 import requests
+from app.decorators import admin_required
 
 filters_blueprint = Blueprint('filters', __name__)
 
@@ -48,6 +49,7 @@ def get_thresholds(user_id):
 
 
 @filters_blueprint.route('/api/filters/thresholds/<int:user_id>', methods=['POST'])
+@admin_required
 def set_thresholds(user_id):
     try:
         ignore_threshold = float(request.form['ignore_threshold'])
@@ -86,6 +88,7 @@ def get_overrides(user_id):
 
 
 @filters_blueprint.route('/api/filters/overrides/<int:user_id>', methods=['POST', 'DELETE'])
+@admin_required
 def add_remove_override(user_id):
     species_name = request.form['species_name']
 

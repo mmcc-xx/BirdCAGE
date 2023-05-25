@@ -13,30 +13,32 @@
 </head>
 <body>
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">BirdCAGE</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/detectionfilters">Detection Filters</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/stream_settings">Stream Settings</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/preferences">Preferences</a>
-                    </li>
-                </ul>
-                {% block date_picker %}{% endblock %}
-            </div>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">BirdCAGE</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Settings
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+                        <li><a class="dropdown-item" href="/detectionfilters">Detection Filters</a></li>
+                        <li><a class="dropdown-item" href="/stream_settings">Stream Settings</a></li>
+                        <li><a class="dropdown-item" href="/preferences">Preferences</a></li>
+                    </ul>
+                </li>
+            </ul>
+            {% block date_picker %}{% endblock %}
         </div>
-    </nav>
-    <!-- End of Navigation -->
+    </div>
+</nav>
+<!-- End of Navigation -->
+
 
     <div class="container-fluid">
         {% block content %}{% endblock %}

@@ -2,6 +2,8 @@
 
 # Newest stuff
 (listed newest first)
+- I made the authentication process for changing settings less kludgey. The default password remains "birdcage". The user
+name is "admin". This required adding yet another environment variable to the docker-compose so you'll need to update again
 - I think I've fixed the issue with multiple cameras not working. The problem was that there were not enough worker
 processes being created. By default there are now 10 worker processes being created. This can be controlled with the
 CONCURRENCY environment variable in the docker-compose file. You need at least (1 per stream) plus... uh... 2 maybe. I'm
@@ -37,7 +39,8 @@ and use back end name for API_SERVER_URL (e.g. API_SERVER_URL: http://birdcageap
 to 8080 in the birdnetserver service section. (In theory interactions with the birdnetserver could all be on the virtual 
 network. I need to try that out. For now, use a LAN address)
 - docker-compose up
-- From the Web UI go to Stream Settings and add a stream. The default password is 'birdcage'. The Name field is for however you want the stream identified in the
+- From the Web UI go to Stream Settings and add a stream. The user name is 'admin and default password is 'birdcage'. 
+The Name field is for however you want the stream identified in the
 UI. Address is the full url of the stream from your source (try opening it in VLC to make sure it works if you aren't sure).
 Protocol is http, rtmp, or rtsp. Transport is TCP or UDP. This is only important for rtsp because it can use either one.
 - Go to Preferences and set your latitude and longitude and tweak other settings. The default password is 'birdcage'. 
