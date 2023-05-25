@@ -2,16 +2,10 @@
 
 # Newest stuff
 (listed newest first)
+- I added an experimental function that allows a YouTube live stream to be analyzed. I did this so I could set up a demo
+server somewhere - stand by for that.
 - I made the authentication process for changing settings less kludgey. The default password remains "birdcage". The user
 name is "admin". This required adding yet another environment variable to the docker-compose so you'll need to update again
-- I think I've fixed the issue with multiple cameras not working. The problem was that there were not enough worker
-processes being created. By default there are now 10 worker processes being created. This can be controlled with the
-CONCURRENCY environment variable in the docker-compose file. You need at least (1 per stream) plus... uh... 2 maybe. I'm
-not sure how they get assigned. 1 task gets spun up per stream plus one for analysis, and these run forever. There's another
-task that gets executed once a week for updating the birds-of-the-week list. So at least 1 per stream plus 2, and add on 
-another if that doesn't work.
-- I pushed an image of the BirdNET-Analyzer including my patches. The docker-compose file now refers to that image, so installation
-should be more straightforward.
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide

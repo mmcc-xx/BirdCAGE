@@ -11,6 +11,9 @@ RUN pip install -r requirements.txt
 # Install Gunicorn
 RUN pip install gunicorn
 
+# Install youtube-dl
+RUN pip install "git+https://github.com/ytdl-org/youtube-dl.git"
+
 # Copy files into the container
 COPY run.py start_app.sh config.py celery_worker.py /
 COPY app /app

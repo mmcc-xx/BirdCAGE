@@ -16,6 +16,7 @@ from app.models.recording_metadata import set_metadata, get_metadata_by_filename
 import glob
 from pydub import AudioSegment
 from .filter_functions import update_birdsoftheweek_table, create_birdsoftheweek_table, getaction
+import subprocess
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 DETECTION_DIR = os.path.join(basedir, '..', DETECTION_DIR_NAME)
@@ -27,6 +28,18 @@ def update_birdsoftheweek_table_task():
     update_birdsoftheweek_table()
 
 
+def get_youtube_stream_url(youtube_video_url, format_code=None):
+    youtube_dl_command = ["youtube-dl", "-g"]
+
+    if format_code:
+        youtube_dl_command.extend(["-f", str(format_code)])
+
+    youtube_dl_command.append(youtube_video_url)
+
+    stream_url = subprocess.check_output(youtube_dl_command).decode("utf-8").strip()
+    return stream_url
+
+
 def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filename):
     try:
         if protocol == 'rtsp':
@@ -34,6 +47,15 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
                 ffmpeg
                 .input(stream_url, rtsp_transport=transport.lower())
                 .output(output_filename, format='wav', t=seconds, loglevel='warning')
+                .run()
+            )
+
+        elif protocol == 'youtube':
+            youtube_stream_url = get_youtube_stream_url(stream_url, format_code=91)
+            (
+                ffmpeg  
+                .input(youtube_stream_url)
+                .output(output_filename, format='wav', t=seconds, loglevel='warning')  
                 .run()
             )
         else:
