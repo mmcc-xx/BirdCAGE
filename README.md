@@ -1,7 +1,12 @@
+# [See it in action](http://demo.birdcage.rocks/)
+This demo deployment is listening in to the [Cornell Lab FeederWatch Cam at Sapsucker Woods](https://www.youtube.com/watch?v=N609loYkFJo)
+and proving real time identification of the birds it hears.
+
 ![BirdCAGE Screenshot](birdcage.JPG)
 
 # Newest stuff
 (listed newest first)
+- Demo server! I should probably change the password before I hit push on this!
 - I added an experimental function that allows a YouTube live stream to be analyzed. I did this so I could set up a demo
 server somewhere - stand by for that.
 - I made the authentication process for changing settings less kludgey. The default password remains "birdcage". The user
