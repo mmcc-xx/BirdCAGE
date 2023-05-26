@@ -23,6 +23,7 @@ def get_birds_of_the_week():
         'latitude': preferences['latitude'],
         'longitude': preferences['longitude'],
         'week_number': week_number,
+        'locale': preferences['locale'],
         'sf_thresh': preferences['sf_thresh']
     })
 

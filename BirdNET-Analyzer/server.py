@@ -125,6 +125,16 @@ def predicted_species():
     longitude = float(bottle.request.query.get('longitude'))
     week_number = int(bottle.request.query.get('week_number'))
     sf_thresh = float(bottle.request.query.get('sf_thresh'))
+    locale = bottle.request.query.get('locale')
+
+    # get localized common names
+    lfile = os.path.join(cfg.TRANSLATED_LABELS_PATH, os.path.basename(cfg.LABELS_FILE).replace('.txt', '_{}.txt'.format(locale)))
+    if not locale in ['en'] and os.path.isfile(lfile):
+        print('Getting Translated Labels', flush=True)
+        cfg.TRANSLATED_LABELS = analyze.loadLabels(lfile)
+    else:
+        print('Not Getting Translated Labels', flush=True)
+        cfg.TRANSLATED_LABELS = cfg.LABELS
 
     cfg.LATITUDE = latitude
     cfg.LONGITUDE = longitude
@@ -218,10 +228,8 @@ def handleRequest():
             lfile = os.path.join(cfg.TRANSLATED_LABELS_PATH,
                                  os.path.basename(cfg.LABELS_FILE).replace('.txt', '_{}.txt'.format(locale)))
             if not locale in ['en'] and os.path.isfile(lfile):
-                print('Loading localized labels', flush=True)
                 cfg.TRANSLATED_LABELS = analyze.loadLabels(lfile)
             else:
-                print('No Loading localized labels', flush=True)
                 cfg.TRANSLATED_LABELS = cfg.LABELS
 
         # Set config based on mdata
