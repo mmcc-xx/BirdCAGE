@@ -28,7 +28,8 @@ def create_preferences_table():
         ('overlap', '0'),
         ('sensitivity', '1'),
         ('sf_thresh', '0.03'),
-        ('password', hashed_password)
+        ('password', hashed_password),
+        ('locale', 'en')
     ]
 
     for key, value in default_preferences:

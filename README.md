@@ -6,6 +6,10 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- Added locale support for results. The UI is still just english, but you can get back common names in other language. See
+the Locale setting in Preferences. After you change it, restart the application.
+- I pushed images for the arm64 platform. If someone could try it out on a Pi 4 or similar and open up an issue if it doesn't work (or a 
+discussion entry if it does) that would be great.
 - Demo server! I should probably change the password before I hit push on this!
 - I added an experimental function that allows a YouTube live stream to be analyzed. I did this so I could set up a demo
 server somewhere - stand by for that.

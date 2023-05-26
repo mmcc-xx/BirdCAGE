@@ -211,7 +211,19 @@ def handleRequest():
 
     # Analyze file
     try:
-        
+
+        # get the right labels
+        if 'locale' in mdata:
+            locale = mdata['locale']
+            lfile = os.path.join(cfg.TRANSLATED_LABELS_PATH,
+                                 os.path.basename(cfg.LABELS_FILE).replace('.txt', '_{}.txt'.format(locale)))
+            if not locale in ['en'] and os.path.isfile(lfile):
+                print('Loading localized labels', flush=True)
+                cfg.TRANSLATED_LABELS = analyze.loadLabels(lfile)
+            else:
+                print('No Loading localized labels', flush=True)
+                cfg.TRANSLATED_LABELS = cfg.LABELS
+
         # Set config based on mdata
         if 'lat' in mdata and 'lon' in mdata:
             cfg.LATITUDE = float(mdata['lat'])

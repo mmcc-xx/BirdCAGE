@@ -8,45 +8,58 @@
 
     <h2 class="my-4">Preferences</h2>
 
-    <form id="preferences-form">
-        <table>
+<form id="preferences-form">
+    <table>
+        <tr>
+            <td>Recording Length</td>
+            <td><input type="text" name="recordinglength" value="{{ current_preferences.recordinglength }}"></td>
+            <td>Constraints: 3 to 120</td>
+        </tr>
+        <tr>
+            <td>Confidence</td>
+            <td><input type="text" name="confidence" value="{{ current_preferences.confidence }}"></td>
+            <td>Constraints: 0 to 1</td>
+        </tr>
+        <tr>
+            <td>Extraction Length</td>
+            <td><input type="text" name="extractionlength" value="{{ current_preferences.extractionlength }}"></td>
+            <td>Constraints: 3 to 120</td>
+        </tr>
+        <tr>
+            <td>Latitude</td>
+            <td><input type="text" name="latitude" value="{{ current_preferences.latitude }}"></td>
+            <td>Constraints: -90 to 90</td>
+        </tr>
+        <tr>
+            <td>Longitude</td>
+            <td><input type="text" name="longitude" value="{{ current_preferences.longitude }}"></td>
+            <td>Constraints: -180 to 180</td>
+        </tr>
+        <tr>
+            <td>Overlap</td>
+            <td><input type="text" name="overlap" value="{{ current_preferences.overlap }}"></td>
+            <td>Constraints: 0 to 2.9</td>
+        </tr>
+        <tr>
+            <td>Sensitivity</td>
+            <td><input type="text" name="sensitivity" value="{{ current_preferences.sensitivity }}"></td>
+            <td>Constraints: 0.5 to 1.5</td>
+        </tr>
+        <tr>
+            <td>SF Threshold</td>
+            <td><input type="text" name="sf_thresh" value="{{ current_preferences.sf_thresh }}"></td>
+            <td>Constraints: 0.01 to 0.99</td>
+        </tr>
+        <tr>
+            <td>Locale</td>
+            <td><input type="text" name="locale" value="{{ current_preferences.locale }}"></td>
+            <td>Constraints: af, ar, cs, da, de, en, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sl, sv, th, tr, uk, zh</td>
+        </tr>
+    </table>
+    <br>
+    <input type="submit" value="Set Preferences">
+</form>
 
-            <tr>
-                <td>Recording Length</td>
-                <td><input type="text" name="recordinglength" value="{{ current_preferences.recordinglength }}"></td>
-            </tr>
-            <tr>
-                <td>Confidence</td>
-                <td><input type="text" name="confidence" value="{{ current_preferences.confidence }}"></td>
-            </tr>
-            <tr>
-                <td>Extraction Length</td>
-                <td><input type="text" name="extractionlength" value="{{ current_preferences.extractionlength }}"></td>
-            </tr>
-            <tr>
-                <td>Latitude</td>
-                <td><input type="text" name="latitude" value="{{ current_preferences.latitude }}"></td>
-            </tr>
-            <tr>
-                <td>Longitude</td>
-                <td><input type="text" name="longitude" value="{{ current_preferences.longitude }}"></td>
-            </tr>
-            <tr>
-                <td>Overlap</td>
-                <td><input type="text" name="overlap" value="{{ current_preferences.overlap }}"></td>
-            </tr>
-            <tr>
-                <td>Sensitivity</td>
-                <td><input type="text" name="sensitivity" value="{{ current_preferences.sensitivity }}"></td>
-            </tr>
-            <tr>
-                <td>SF Threshold</td>
-                <td><input type="text" name="sf_thresh" value="{{ current_preferences.sf_thresh }}"></td>
-            </tr>
-        </table>
-        <br>
-        <input type="submit" value="Set Preferences">
-    </form>
 
     <div id="message"></div>
 

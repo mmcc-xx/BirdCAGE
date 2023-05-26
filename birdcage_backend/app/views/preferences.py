@@ -61,6 +61,14 @@ def validate_preference(preference_key, preference_value):
     if preference_key == 'password':
         return validate_password(preference_value)
 
+    # Add a condition to check for 'locale' preference key
+    if preference_key == 'locale':
+        allowed_locales = ['af', 'ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sv', 'th', 'tr', 'uk', 'zh']
+        if preference_value in allowed_locales:
+            return True, None
+        else:
+            return False, "Invalid locale value."
+
     try:
         numeric_value = float(preference_value)
     except ValueError:

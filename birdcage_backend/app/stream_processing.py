@@ -266,6 +266,7 @@ def analyze_recordings():
                          'sf_thresh': preferences['sf_thresh'],
                          'pmode': 'max',
                          'num_results': 5,
+                         'locale': preferences['locale'],
                          'save': False}
 
                 analysis = sendRequest(file_path, json.dumps(mdata))
