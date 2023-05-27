@@ -217,7 +217,7 @@ def explore(lat, lon, week):
     l_filter = np.where(l_filter >= cfg.LOCATION_FILTER_THRESHOLD, l_filter, 0)
 
     # Zip with labels
-    l_filter = list(zip(l_filter, cfg.TRANSLATED_LABELS))
+    l_filter = list(zip(l_filter, cfg.LABELS))
 
     # Sort by filter value
     l_filter = sorted(l_filter, key=lambda x: x[0], reverse=True)
