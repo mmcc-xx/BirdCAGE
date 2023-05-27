@@ -7,11 +7,14 @@ app = Flask(__name__)
 
 API_SERVER_URL = os.environ.get('API_SERVER_URL', 'http://192.168.1.75:7006')
 WEBUI_PORT = os.environ.get('WEBUI_PORT', '7009')
+TITLE_TEXT = os.environ.get('TITLE_LINK', '')
+TITLE_LINK = os.environ.get('TITLE_LINK', '')
 
 @app.route('/')
 def index():
     today = datetime.now().strftime('%Y-%m-%d')
-    return render_template('index.html', api_server_url=API_SERVER_URL, today=today)
+    return render_template('index.html', api_server_url=API_SERVER_URL, today=today, title_text=TITLE_TEXT,
+                           title_link=TITLE_LINK)
 
 
 @app.route('/detections/by_hour/<date>/<int:hour>')
