@@ -5,7 +5,25 @@ from config import DATABASE_FILE
 detections_blueprint = Blueprint('detections', __name__)
 
 
-# Get X most recent detections
+# Get the date of the earliest detection
+@detections_blueprint.route('/api/detections/earliest-date', methods=['GET'])
+def get_earliest_detection_date():
+    connection = sqlite3.connect(DATABASE_FILE)
+    cursor = connection.cursor()
+
+    cursor.execute('SELECT MIN(timestamp) FROM detections')
+    earliest_date = cursor.fetchone()
+
+    connection.close()
+
+    # Check if there is any data in the table
+    if earliest_date[0] is not None:
+        return jsonify({"earliest_date": earliest_date[0]})
+    else:
+        return jsonify({"error": "No data available"})
+
+
+    # Get X most recent detections
 @detections_blueprint.route('/api/detections/recent/<int:limit>', methods=['GET'])
 def get_recent_detections(limit):
     connection = sqlite3.connect(DATABASE_FILE)

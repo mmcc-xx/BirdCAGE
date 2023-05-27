@@ -51,6 +51,22 @@
             }
         });
 
+        function setDatePickerMinMaxDate() {
+            fetch('{{ api_server_url }}/api/detections/earliest-date')
+                .then(response => response.json())
+                .then(data => {
+                    const datePicker = document.getElementById('date-picker');
+                    // Set the minimum date
+                    if (data.earliest_date) {
+                        datePicker.min = data.earliest_date.split(' ')[0]; // Convert datetime to date format (YYYY-MM-DD)
+                    }
+
+                    // Set the maximum date to today's date
+                    const today = new Date().toISOString().split('T')[0];
+                    datePicker.max = today;
+                });
+        }
+
         function generateEmptyGrid(data) {
             const commonNames = [...new Set(data.map(row => row.common_name))];
             const hours = Array.from({length: 24}, (_, i) => i);
@@ -109,6 +125,9 @@
         function updateTables() {
           updateDetectionsByDayAndHourTable();
         }
+
+        // Call the setDatePickerMinMaxDate function when the page loads
+        setDatePickerMinMaxDate();
 
         // Call the updateTables function when the page loads
         updateTables();
