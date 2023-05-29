@@ -10,11 +10,13 @@ from app.views.preferences import preferences_blueprint
 from app.views.audio_files import audio_files_blueprint
 from app.views.detections import detections_blueprint
 from app.views.filters import filters_blueprint
+from app.views.notifications import notifications_blueprint
 from app.models.streams import create_streams_table
 from app.models.preferences import create_preferences_table
 from app.models.recording_metadata import create_recording_metadata_table
 from app.models.detections import create_detections_table
 from app.models.filters import create_filters_tables
+from app.models.notifications import create_notification_services_table, create_notification_assignments_table
 from config import CORS_ORIGINS, JWT_SECRET_KEY
 
 
@@ -29,6 +31,8 @@ def create_app(init_celery=True):
     create_recording_metadata_table()
     create_detections_table()
     create_filters_tables()
+    create_notification_services_table()
+    create_notification_assignments_table()
 
     if init_celery:
         # Initialize Celery
@@ -59,6 +63,7 @@ def create_app(init_celery=True):
         app.register_blueprint(audio_files_blueprint)
         app.register_blueprint(detections_blueprint)
         app.register_blueprint(filters_blueprint)
+        app.register_blueprint(notifications_blueprint)
 
     return app
 

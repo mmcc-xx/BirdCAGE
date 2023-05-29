@@ -6,6 +6,10 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- Added notifications via Apprise. You'll see a new pick under the Settings window for Notifications Settings. Put in URLs
+for up to 3 notifications services per the Apprise documentation, and associate those services with the Log, Record and Alert
+detection levels defined in the Filter Settings. I tried MQTT and email via gmail and both worked. Note: this does not replace
+a real MQTT interface which I'm planning to work on real soon now.
 - Added locale support for results. The UI is still just english, but you can get back common names in other language. See
 the Locale setting in Preferences. After you change it, restart the application.
 - I pushed images for the arm64 platform. If someone could try it out on a Pi 4 or similar and open up an issue if it doesn't work (or a 
@@ -13,8 +17,6 @@ discussion entry if it does) that would be great.
 - Demo server! I should probably change the password before I hit push on this!
 - I added an experimental function that allows a YouTube live stream to be analyzed. I did this so I could set up a demo
 server somewhere - stand by for that.
-- I made the authentication process for changing settings less kludgey. The default password remains "birdcage". The user
-name is "admin". This required adding yet another environment variable to the docker-compose so you'll need to update again
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide
@@ -64,7 +66,8 @@ This is early days. Chances are things will break. Let me know what's broke in t
 letter or whatever.
 
 ## To Do
-- Add more features, e.g. block storing recordings of selected species. I don't need any more recordings of Robins.
 - Handle changing streams and preferences without having to kill the app.
 - I'm planning to work on a "sattelite recorder" based on the ESP32 platform. It'll probably need a different interface to upload audio
 to avoid interference between the audio and WiFi.
+- Reporting
+- MQTT interface

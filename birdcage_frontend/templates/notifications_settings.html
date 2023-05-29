@@ -1,0 +1,195 @@
+{% extends "protected.html" %}
+
+{% block title %}
+Notification Settings
+{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+  <div class="col">
+    <h2>Notification Service URLs</h2>
+    <table class="table table-striped" id="services-table">
+      <thead>
+        <tr>
+          <th scope="col">Service Name</th>
+          <th scope="col">Service URL</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="row mt-4">
+  <div class="col">
+    <h2>Notification Service Assignments</h2>
+    <table class="table table-striped" id="assignments-table">
+      <thead>
+        <tr>
+          <th scope="col">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Log</td>
+        </tr>
+        <tr>
+          <td>Record</td>
+        </tr>
+        <tr>
+          <td>Alert</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add the new section about Apprise -->
+<div class="row mt-4">
+  <div class="col">
+    <h3>Notifications Powered by Apprise</h3>
+    <p>
+      Notifications are enabled by Apprise. Information on how to format URLs for various platforms can be found in the
+      <a href="https://github.com/caronc/apprise/wiki" target="_blank" rel="noopener">Apprise Wiki</a>.
+    </p>
+  </div>
+</div>
+<!-- End of the new section -->
+{% endblock %}
+
+{% block scripts %}
+<script>
+const API_SERVER_URL = '{{ api_server_url }}';
+const jwt_token = localStorage.getItem("jwt_token");
+
+function getNotificationServices() {
+  return fetch(`${API_SERVER_URL}/services`, {
+    headers: {
+      'Authorization': `Bearer ${jwt_token}`
+    }
+  }).then(res => res.json());
+}
+
+function setServiceUrl(serviceName, serviceUrl) {
+  return fetch(`${API_SERVER_URL}/services/${serviceName}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${jwt_token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ service_url: serviceUrl })
+  }).then(res => res.json());
+}
+
+function getAssignments() {
+  return fetch(`${API_SERVER_URL}/assignments`, {
+    headers: {
+      'Authorization': `Bearer ${jwt_token}`
+    }
+  }).then(res => res.json());
+}
+
+function addAssignment(detection_action, notification_service) {
+  return fetch(`${API_SERVER_URL}/assignments`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${jwt_token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ detection_action, notification_service })
+  }).then(res => res.json());
+}
+
+function removeAssignment(detection_action, notification_service) {
+  return fetch(`${API_SERVER_URL}/assignments`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${jwt_token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ detection_action, notification_service })
+  }).then(res => res.json());
+}
+
+function loadServicesTable() {
+  getNotificationServices().then(services => {
+    const tbody = document.querySelector('#services-table tbody');
+    services.forEach(service => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${service.service_name}</td>
+        <td><input type="text" class="form-control service-url-input" value="${service.service_url}" data-service="${service.service_name}"></td>
+        <td><button class="btn btn-primary save-url-btn" data-service="${service.service_name}">Save URL</button></td>
+      `;
+      tbody.appendChild(row);
+    });
+  });
+}
+
+function loadAssignmentsTable() {
+  getNotificationServices().then(services => {
+    // Update header row with service names
+    const headerRow = document.querySelector('#assignments-table thead tr');
+    services.forEach(service => {
+      const th = document.createElement('th');
+      th.className = 'text-center';
+      th.innerText = service.service_name;
+      headerRow.appendChild(th);
+    });
+
+    const actions = ['log', 'record', 'alert'];
+    const tbody = document.querySelector('#assignments-table tbody');
+    actions.forEach((action, rowIndex) => {
+      services.forEach((service, colIndex) => {
+        const td = document.createElement('td');
+        td.className = 'text-center';
+        td.innerHTML = `<input type="checkbox" class="assignment-checkbox" data-action="${action}" data-service="${service.service_name}">`;
+        tbody.rows[rowIndex].appendChild(td);
+      });
+    });
+
+    getAssignments().then(assignments => {
+      assignments.forEach(assignment => {
+        const checkbox = document.querySelector(`.assignment-checkbox[data-action="${assignment.detection_action}"][data-service="${assignment.notification_service}"]`);
+        if (checkbox) {
+          checkbox.checked = true;
+        }
+      });
+    });
+  });
+}
+
+
+
+loadServicesTable();
+loadAssignmentsTable();
+
+document.querySelector('#services-table').addEventListener('click', e => {
+  if (e.target.classList.contains('save-url-btn')) {
+    const serviceName = e.target.dataset.service;
+    const input = document.querySelector(`.service-url-input[data-service="${serviceName}"]`);
+    const serviceUrl = input.value;
+    setServiceUrl(serviceName, serviceUrl).then(res => {
+      alert(res.message);
+    });
+  }
+});
+
+document.querySelector('#assignments-table').addEventListener('change', e => {
+  if (e.target.classList.contains('assignment-checkbox')) {
+    const detection_action = e.target.dataset.action;
+    const notification_service = e.target.dataset.service;
+    if (e.target.checked) {
+      addAssignment(detection_action, notification_service).then(res => {
+        console.log(res.message);
+      });
+    } else {
+      removeAssignment(detection_action, notification_service).then(res => {
+        console.log(res.message);
+      });
+    }
+  }
+});
+</script>
+{% endblock %}

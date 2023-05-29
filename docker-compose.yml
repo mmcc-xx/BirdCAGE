@@ -53,6 +53,9 @@ services:
     environment:
       API_SERVER_URL: http://192.168.1.75:7007
       WEBUI_PORT: 7008
+      #TITLE_TEXT: Your Title Here
+      #TITLE_LINK: http://yourlinkhere
+      #Include the above variables if you want to put some text, and optionally a link, in the nav bar
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/etc/timezone:/etc/timezone:ro"

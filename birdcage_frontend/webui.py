@@ -10,6 +10,7 @@ WEBUI_PORT = os.environ.get('WEBUI_PORT', '7009')
 TITLE_TEXT = os.environ.get('TITLE_TEXT', '')
 TITLE_LINK = os.environ.get('TITLE_LINK', '')
 
+
 @app.route('/')
 def index():
     today = datetime.now().strftime('%Y-%m-%d')
@@ -63,6 +64,11 @@ def detectionfilters():
 @app.route("/login", methods=["GET"])
 def login():
     return render_template("login.html", api_server_url=API_SERVER_URL)
+
+
+@app.route('/notification_settings', methods=['GET'])
+def notification_settings():
+    return render_template('notifications_settings.html', api_server_url=API_SERVER_URL)
 
 
 if __name__ == '__main__':

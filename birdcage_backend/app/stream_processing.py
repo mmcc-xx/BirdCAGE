@@ -17,6 +17,7 @@ import glob
 from pydub import AudioSegment
 from .filter_functions import update_birdsoftheweek_table, create_birdsoftheweek_table, getaction
 import subprocess
+from .notify import notify
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 DETECTION_DIR = os.path.join(basedir, '..', DETECTION_DIR_NAME)
@@ -128,6 +129,7 @@ def sendRequest(fpath, mdata):
 
         # Convert to dict
         data = json.loads(response.text)
+        # print("Returned Data: " + response.text)
 
         return data
     except Exception:
@@ -168,6 +170,7 @@ def check_results(results, filepath, recording_metadata, preferences):
                 # Trim the wav file to the interval and save as mp3 if not already saved
                 print("Detected: " + common_name + " Action: " + detectionaction, flush=True)
 
+                mp3path = ''
                 # only save mp3 if acton is record or alert
                 if (not mp3_saved) and (detectionaction == 'record' or detectionaction == 'alert'):
                     # Generate a UUID for the mp3 filename
@@ -183,8 +186,9 @@ def check_results(results, filepath, recording_metadata, preferences):
                         endwithspace = recordinglength
 
                     mp3_filename = f"{str(uuid.uuid4())}.mp3"
+                    mp3path = DETECTION_DIR + "/" + mp3_filename
                     trimmed_audio = wav_audio[int(startwithspace * 1000):int(endwithspace * 1000)]
-                    trimmed_audio.export(DETECTION_DIR + "/" + mp3_filename, format="mp3")
+                    trimmed_audio.export(mp3path, format="mp3")
                     mp3_saved = True
 
                 # Call add_detection with the mp3_filename
@@ -197,13 +201,13 @@ def check_results(results, filepath, recording_metadata, preferences):
                 if detectionaction == 'log':
                     add_detection(timestamp, stream_id, streamname, scientific_name, common_name, confidence_score,
                                   '')
+
                 else: # if detection action is record or alert
                     add_detection(timestamp, stream_id, streamname, scientific_name, common_name, confidence_score,
                               mp3_filename)
 
-                if detectionaction == 'alert':
-                    # to be replaced when alert functionality is added
-                    print('Oh my god its a ' + scientific_name + ' better known as a ' + common_name)
+                notify(detectionaction, timestamp, stream_id, streamname, scientific_name, common_name,
+                       confidence_score, mp3path)
 
 
 @shared_task()

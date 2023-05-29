@@ -4,11 +4,9 @@ FROM python:3.8-slim
 # Install required packages while keeping the image small
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg  && rm -rf /var/lib/apt/lists/*
 
-# Install required Python packages
-RUN pip3 install numpy scipy librosa bottle resampy
-
-# Install Tensforflow
-RUN pip3 install tflite-runtime
+COPY requirements.txt /
+# Install Python packages from requirements.txt
+RUN pip install -r requirements.txt
 
 # Import all scripts
 COPY . ./
