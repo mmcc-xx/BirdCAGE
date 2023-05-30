@@ -36,19 +36,17 @@
     <div class="row">
         <div class="col-12">
             <h2>Detection Summary</h2>
-            <div class="table-responsive">
-                <table class="table" id="detections-by-day-and-hour-table">
-                    <thead>
-                        <tr>
-                            <th>Common Name</th>
-                            {% for hour in range(24) %}
-                            <th><a href="{{ url_for('show_detections_by_hour', date=today, hour=hour) }}" class="btn btn-secondary btn-sm">{{ hour }}</a></th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+                <div class="table-responsive">
+                    <table class="table table-fixed-header" id="detections-by-day-and-hour-table">
+                        <thead>
+                          <tr class-="sticky-header">
+                            <th class="common-name-col">Common Name</th>
+                            <!-- The header columns for hours will be generated through JavaScript -->
+                          </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
         </div>
     </div>
 {% endblock %}
@@ -57,6 +55,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script>
         const API_SERVER_URL = "{{ api_server_url }}";
+        const SHOW_DETECTIONS_BY_HOUR_URL = "{{ url_for('show_detections_by_hour', date=today, hour=0) }}".slice(0, -1);
+
 
         // Add the event listener for date picker
         document.getElementById("date-picker").addEventListener("change", function (event) {
@@ -171,19 +171,40 @@
           return `${year}-${month}-${day}`;
         };
 
-        function updateDetectionsByDayAndHourTable() {
 
+        function updateTableHeader(startHour, numColumns) {
+            const headerRow = document.querySelector('#detections-by-day-and-hour-table thead tr');
+            const currHour = new Date().getHours();
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             const today = getCurrentDateInTimezone(timezone);
+            // Remove existing hour columns
+            while (headerRow.children.length > 1) {
+                headerRow.removeChild(headerRow.lastChild);
+            }
 
-            // const today = now.toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+            // Add visible hour columns
+            for (let i = 0; i < numColumns - 1; i++) {
+                const hour = (startHour + i) % 24;
+                if (hour <= currHour) { // Only create columns for past and current hours
+                    const th = document.createElement('th');
+                    const link = document.createElement('a');
+                    link.href = `/detections/by_hour/${today}/${hour}`;
+                    link.textContent = hour;
+                    link.classList.add('btn', 'btn-secondary', 'btn-sm');
+                    th.appendChild(link);
+                    headerRow.appendChild(th);
+                }
+            }
+        }
+
+
+        function fetchData() {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const today = getCurrentDateInTimezone(timezone);
 
             fetch(`{{ api_server_url }}/api/detections/count_by_hour/${today}`)
                 .then(response => response.json())
                 .then(data => {
-                    const tableBody = document.querySelector('#detections-by-day-and-hour-table tbody');
-                    tableBody.innerHTML = '';
-
                     const grid = generateEmptyGrid(data);
 
                     // Fill the grid with the fetched data
@@ -192,37 +213,73 @@
                         gridRow[rowData.hour] = rowData.count;
                     });
 
-                    // Create table rows and cells
-                    grid.forEach(rowData => {
-                        const row = document.createElement('tr');
-
-                        // Add common_name cell
-                        const commonNameCell = document.createElement('td');
-                        const commonNameLink = document.createElement('a');
-                        commonNameLink.href = `/detections/by_common_name/${today}/${encodeURIComponent(rowData.common_name)}`;
-                        commonNameLink.textContent = rowData.common_name;
-                        commonNameLink.classList.add('link-dark');
-                        commonNameCell.appendChild(commonNameLink);
-                        row.appendChild(commonNameCell);
-
-                        // Add hour cells (0-23)
-                        for (let i = 0; i < 24; i++) {
-                            const cell = document.createElement('td');
-                            const value = rowData[i];
-                            cell.textContent = value === 0 ? '' : value;
-                            row.appendChild(cell);
-                        }
-
-                        tableBody.appendChild(row);
-                    });
+                    updateDetectionsByDayAndHourTable(grid);
                 });
+        }
+
+        function updateDetectionsByDayAndHourTable(grid) {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const today = getCurrentDateInTimezone(timezone);
+            const containerWidth = document.querySelector('.table-responsive').offsetWidth;
+            //const numColumns = Math.floor(containerWidth / 100);
+            const currHour = new Date().getHours();
+            //const startHour = Math.max(0, currHour - (numColumns - 2));
+            const numColumns = currHour + 2;
+            const startHour = 0;
+
+            updateTableHeader(startHour, numColumns);
+
+            const tableBody = document.querySelector('#detections-by-day-and-hour-table tbody');
+            tableBody.innerHTML = '';
+
+            // Create table rows and cells
+            grid.forEach(rowData => {
+                const row = document.createElement('tr');
+                row.dataset.commonName = rowData.common_name;
+
+                // Add common_name cell
+                const commonNameCell = document.createElement('td');
+                const commonNameLink = document.createElement('a');
+                commonNameLink.href = `/detections/by_common_name/${today}/${encodeURIComponent(rowData.common_name)}`;
+                commonNameLink.textContent = rowData.common_name;
+                commonNameLink.classList.add('link-dark');
+                commonNameCell.appendChild(commonNameLink);
+                row.appendChild(commonNameCell);
+
+                // Add visible hour cells
+                for (let i = 0; i < numColumns - 1; i++) {
+                    const hour = (startHour + i) % 24;
+                    if (hour <= currHour) { // Only create columns for past and current hours
+                        const cell = document.createElement('td');
+                        const value = rowData[hour] || 0;
+                        if (value !== 0) {
+                            cell.textContent = value;
+                        }
+                        row.appendChild(cell);
+                        row.dataset[hour] = value;
+                    }
+                }
+
+                tableBody.appendChild(row);
+            });
         }
 
 
         function updateTables() {
           updateRecentDetectionsTable();
-          updateDetectionsByDayAndHourTable();
+          fetchData();
         }
+
+        function scrollToCurrentHour() {
+            const table = document.getElementById('detections-by-day-and-hour-table');
+            const tableContainer = table.closest('.table-responsive');
+            setTimeout(() => {
+                tableContainer.scrollLeft = tableContainer.scrollWidth;
+            }, 100);
+        }
+
+        // Call scrollToCurrentHour when the page loads
+        window.addEventListener('DOMContentLoaded', scrollToCurrentHour);
 
         // Call the updateTables function when the page loads
         updateTables();
@@ -233,5 +290,9 @@
         // Set up an interval to call the updateTables function periodically
         const updateInterval = 30000; // 30 seconds in milliseconds
         setInterval(updateTables, updateInterval);
+
+        window.addEventListener('resize', () => {
+            fetchData();
+        });
     </script>
 {% endblock %}

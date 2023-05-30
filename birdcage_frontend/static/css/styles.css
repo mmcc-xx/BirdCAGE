@@ -33,3 +33,71 @@
   background-color: #f5f5f5;
   cursor: pointer;
 }
+
+.table-fixed-header thead {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
+
+/* Fix the position of the Common Name column header */
+.table-responsive .table-fixed-header thead th.common-name-col {
+  position: sticky;
+  left: 0;
+  background-color: white;
+  z-index: 1;
+}
+
+/* Fix the position of the Common Name column cells */
+.table-responsive .table-fixed-header tbody td:first-child {
+  position: sticky;
+  left: 0;
+  background-color: white;
+  z-index: 1;
+}
+
+/* Optional: Add a right border to the Common Name column */
+.table-responsive .table-fixed-header th.common-name-col,
+.table-responsive .table-fixed-header td:first-child {
+  border-right: 1px solid #dee2e6; /* Adjust the color based on your table border color */
+}
+
+/* Set a fixed width for the Common Name column */
+#detections-by-day-and-hour-table th.common-name-col,
+#detections-by-day-and-hour-table td:first-child {
+  width: 150px; /* Adjust this value based on your desired column width */
+  max-width: 150px; /* Adjust this value based on your desired column width */
+  overflow-wrap: break-word;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* Optional: Add padding to the Common Name column on mobile devices */
+@media (max-width: 575.98px) {
+  #detections-by-day-and-hour-table th.common-name-col,
+  #detections-by-day-and-hour-table td:first-child {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .table-responsive {
+    overflow-x: scroll;
+  }
+}
+
+.sticky-header th {
+  background-color: #f1f1f1;
+  position: -webkit-sticky; /* For Safari */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Fix for header row not sticking inside .table-responsive container */
+.table-responsive {
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
