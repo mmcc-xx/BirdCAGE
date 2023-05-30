@@ -6,6 +6,8 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- Made the grid on the index page a little nicer, especially for small screens. Future hours aren't show, and the column and row headers are
+"sticky" when you scroll around.
 - Added notifications via Apprise. You'll see a new pick under the Settings window for Notifications Settings. Put in URLs
 for up to 3 notifications services per the Apprise documentation, and associate those services with the Log, Record and Alert
 detection levels defined in the Filter Settings. I tried MQTT and email via gmail and both worked. Note: this does not replace
@@ -14,9 +16,6 @@ a real MQTT interface which I'm planning to work on real soon now.
 the Locale setting in Preferences. After you change it, restart the application.
 - I pushed images for the arm64 platform. If someone could try it out on a Pi 4 or similar and open up an issue if it doesn't work (or a 
 discussion entry if it does) that would be great.
-- Demo server! I should probably change the password before I hit push on this!
-- I added an experimental function that allows a YouTube live stream to be analyzed. I did this so I could set up a demo
-server somewhere - stand by for that.
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide
