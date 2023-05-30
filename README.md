@@ -6,6 +6,8 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- Added a preference for how long to retain recordings, and once a day delete all recordings older than that. I keep the database
+entries as they are pretty tiny.
 - Made the grid on the index page a little nicer, especially for small screens. Future hours aren't show, and the column and row headers are
 "sticky" when you scroll around.
 - Added notifications via Apprise. You'll see a new pick under the Settings window for Notifications Settings. Put in URLs

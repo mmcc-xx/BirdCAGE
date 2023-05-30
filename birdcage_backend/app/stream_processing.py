@@ -2,7 +2,7 @@ from flask import current_app
 from celery import group, shared_task
 from app.views.streams import get_streams_list
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from pathlib import Path
 import ffmpeg
@@ -18,6 +18,7 @@ from pydub import AudioSegment
 from .filter_functions import update_birdsoftheweek_table, create_birdsoftheweek_table, getaction
 import subprocess
 from .notify import notify
+from .recordingcleanup import recordingcleanup
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 DETECTION_DIR = os.path.join(basedir, '..', DETECTION_DIR_NAME)
@@ -221,6 +222,7 @@ def analyze_recordings():
         os.makedirs(DETECTION_DIR)
 
     preferences = get_all_user_preferences(0)
+    last_cleanup_time = datetime.now()
 
     # This loop will look for wav files, analyze them, sleep a bit and then do it again
     while True:
@@ -285,6 +287,15 @@ def analyze_recordings():
 
                 else:
                     print('FAIL')
+
+        # Clean up recordings once per day.
+        if (datetime.now() - last_cleanup_time) > timedelta(days=1):
+            recording_retention = float(preferences['recordingretention'])
+            if recording_retention > 0:
+                # Call the recordingcleanup function and update the last_cleanup_time
+                recordingcleanup(recording_retention)
+
+            last_cleanup_time = datetime.now()
 
         time.sleep(1)
 

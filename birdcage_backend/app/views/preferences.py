@@ -83,6 +83,7 @@ def validate_preference(preference_key, preference_value):
         "overlap": (0, 2.9),
         "sensitivity": (0.5, 1.5),
         "sf_thresh": (0.01, 0.99),
+        "recordingretention": (0, 36500)
     }
 
     if preference_key not in constraints:

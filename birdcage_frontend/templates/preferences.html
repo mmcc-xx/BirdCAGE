@@ -11,7 +11,7 @@
 <form id="preferences-form">
     <table>
         <tr>
-            <td>Recording Length</td>
+            <td>Recording Length (sec)</td>
             <td><input type="text" name="recordinglength" value="{{ current_preferences.recordinglength }}"></td>
             <td>Constraints: 3 to 120</td>
         </tr>
@@ -21,7 +21,7 @@
             <td>Constraints: 0 to 1</td>
         </tr>
         <tr>
-            <td>Extraction Length</td>
+            <td>Extraction Length (sec)</td>
             <td><input type="text" name="extractionlength" value="{{ current_preferences.extractionlength }}"></td>
             <td>Constraints: 3 to 120</td>
         </tr>
@@ -36,7 +36,7 @@
             <td>Constraints: -180 to 180</td>
         </tr>
         <tr>
-            <td>Overlap</td>
+            <td>Overlap (sec)</td>
             <td><input type="text" name="overlap" value="{{ current_preferences.overlap }}"></td>
             <td>Constraints: 0 to 2.9</td>
         </tr>
@@ -54,6 +54,11 @@
             <td>Locale</td>
             <td><input type="text" name="locale" value="{{ current_preferences.locale }}"></td>
             <td>Constraints: af, ar, cs, da, de, en, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sl, sv, th, tr, uk, zh</td>
+        </tr>
+        <tr>
+            <td>Recording Retention (days)</td>
+            <td><input type="text" name="recordingretention" value="{{ current_preferences.recordingretention }}"></td>
+            <td>Constraints: 0 to 36500 (0 = forever)</td>
         </tr>
     </table>
     <br>
