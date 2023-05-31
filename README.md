@@ -6,6 +6,9 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- I have a highly credible report of BirdCAGE successfully runnong on a Raspberry Pi 4! This particular Pi was running the latest
+DietPi OS, but it _should_ work on any 64 bit Linux. It _should_ also work on other arm64 based machines. Please try it out and if it
+doesn't work, open an issue. If it does work, please post in the discussions forum.
 - Added a preference for how long to retain recordings, and once a day delete all recordings older than that. I keep the database
 entries as they are pretty tiny.
 - Made the grid on the index page a little nicer, especially for small screens. Future hours aren't show, and the column and row headers are
@@ -16,8 +19,6 @@ detection levels defined in the Filter Settings. I tried MQTT and email via gmai
 a real MQTT interface which I'm planning to work on real soon now.
 - Added locale support for results. The UI is still just english, but you can get back common names in other language. See
 the Locale setting in Preferences. After you change it, restart the application.
-- I pushed images for the arm64 platform. If someone could try it out on a Pi 4 or similar and open up an issue if it doesn't work (or a 
-discussion entry if it does) that would be great.
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide
