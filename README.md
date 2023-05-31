@@ -56,7 +56,7 @@ in luck: your latitude and longitude are already set.
 - Consider changing the default password. Or don't.
 - Did the above not work?
     - See if you can go to whatever you set as your API_SERVER_URL in your browser. You should see a (very incomplete) UI of API documentation.
-    If not, the back end / API server is not exposed to the network correctly or the docket-compose file isn't configured correctly. Or both.
+    If not, the back end / API server is not exposed to the network correctly or the docker-compose file isn't configured correctly. Or both.
     - If that works, go back to the Preferences page, hit F12 and see if there are any client side scripting errors. All of the API
     calls are done in client side scriping in the browser to keep things snappy. If you are accessing the Web UI through a name via a reverse
     proxy, that name needs to be added to the CORS_ORIGINS environment variable in docker-compose.yml, you need to set a name for the back end/API server, and that name
