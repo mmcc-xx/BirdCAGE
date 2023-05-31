@@ -9,8 +9,8 @@ and proving real time identification of the birds it hears.
 - I have a highly credible report of BirdCAGE successfully runnong on a Raspberry Pi 4! This particular Pi was running the latest
 DietPi OS, but it _should_ work on any 64 bit Linux. It _should_ also work on other arm64 based machines. Please try it out and if it
 doesn't work, open an issue. If it does work, please post in the discussions forum.
-- Added a preference for how long to retain recordings, and once a day delete all recordings older than that. I keep the database
-entries as they are pretty tiny.
+- Added a preference for how long to retain recordings, and once a day delete all recordings older than that. Database
+entries are kept as as they are pretty tiny.
 - Made the grid on the index page a little nicer, especially for small screens. Future hours aren't show, and the column and row headers are
 "sticky" when you scroll around.
 - Added notifications via Apprise. You'll see a new pick under the Settings window for Notifications Settings. Put in URLs
