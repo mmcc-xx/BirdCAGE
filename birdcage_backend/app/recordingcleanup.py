@@ -23,7 +23,7 @@ def recordingcleanup(numdays):
     cursor = conn.cursor()
 
     # Retrieve records older than numdays
-    cursor.execute("SELECT id, filename FROM detections WHERE timestamp < ? AND LENGTH(filename) > 0", (timestamp_limit,))
+    cursor.execute("SELECT id, filename FROM detections WHERE timestamp < ? AND LENGTH(filename) > 0 AND (id, filename) NOT IN (SELECT id, filename FROM (SELECT id, filename, max(confidence) FROM detections WHERE LENGTH(filename)> 0 GROUP BY scientific_name))", (timestamp_limit,))
     records = cursor.fetchall()
 
     # Iterate through records
