@@ -16,7 +16,7 @@ def recordingcleanup(numdays):
 
     # Set the value of DETECTION_DIR
     basedir = os.path.dirname(os.path.abspath(__file__))
-    DETECTION_DIR = os.path.join(basedir, '', DETECTION_DIR_NAME)
+    DETECTION_DIR = os.path.join(basedir, '..', DETECTION_DIR_NAME)
 
     # Connect to the database
     conn = sqlite3.connect(DATABASE_FILE)
@@ -49,3 +49,6 @@ def recordingcleanup(numdays):
             # Commit the changes and close the connection
     conn.commit()
     conn.close()
+
+if __name__ == '__main__':
+    recordingcleanup(3)

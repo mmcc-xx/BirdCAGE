@@ -38,8 +38,12 @@ def get_youtube_stream_url(youtube_video_url, format_code=None):
 
     youtube_dl_command.append(youtube_video_url)
 
-    stream_url = subprocess.check_output(youtube_dl_command).decode("utf-8").strip()
-    return stream_url
+    try:
+        stream_url = subprocess.check_output(youtube_dl_command).decode("utf-8").strip()
+        return stream_url
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to get YouTube stream URL: {e}", flush=True)
+        return None
 
 
 def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filename):
@@ -54,6 +58,8 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
 
         elif protocol == 'youtube':
             youtube_stream_url = get_youtube_stream_url(stream_url, format_code=91)
+            if youtube_stream_url is None:
+                return {'status': 'failure', 'error': 'error getting youtube url'}
             (
                 ffmpeg  
                 .input(youtube_stream_url)

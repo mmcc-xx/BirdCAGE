@@ -30,7 +30,12 @@ def create_preferences_table():
         ('sf_thresh', '0.03'),
         ('password', hashed_password),
         ('locale', 'en'),
-        ('recordingretention', '0')
+        ('recordingretention', '0'),
+        ('mqttbroker', ''),
+        ('mqttport', '1883'),
+        ('mqttuser', ''),
+        ('mqttpassword', ''),
+        ('mqttrecordings', 'false')
     ]
 
     for key, value in default_preferences:

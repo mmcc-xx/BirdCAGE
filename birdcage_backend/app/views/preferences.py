@@ -69,6 +69,22 @@ def validate_preference(preference_key, preference_value):
         else:
             return False, "Invalid locale value."
 
+    if (preference_key == 'mqttbroker') or (preference_key == 'mqttuser') or (preference_key == 'mqttpassword'):
+        # we'll try whatever the user put in
+        return True, None
+
+    if preference_key == 'mqttrecordings':
+        if (preference_value == 'true') or (preference_value == 'false'):
+            return True, None
+        else:
+            return False, "Value must be true or false"
+
+    if preference_key == 'mqttport':
+        try:
+            int_value = int(preference_value)
+        except ValueError:
+            return False, "Value must be an integer"
+
     try:
         numeric_value = float(preference_value)
     except ValueError:
@@ -83,7 +99,8 @@ def validate_preference(preference_key, preference_value):
         "overlap": (0, 2.9),
         "sensitivity": (0.5, 1.5),
         "sf_thresh": (0.01, 0.99),
-        "recordingretention": (0, 36500)
+        "recordingretention": (0, 36500),
+        "mqttport": (1, 65535)
     }
 
     if preference_key not in constraints:

@@ -60,6 +60,31 @@
             <td><input type="text" name="recordingretention" value="{{ current_preferences.recordingretention }}"></td>
             <td>Constraints: 0 to 36500 (0 = forever)</td>
         </tr>
+        <tr>
+            <td>MQTT Broker</td>
+            <td><input type="text" name="mqttbroker" value="{{ current_preferences.mqttbroker }}"></td>
+            <td>Address of your MQTT Broker. Leave blank to not use MQTT</td>
+        </tr>
+        <tr>
+            <td>MQTT Port</td>
+            <td><input type="text" name="mqttport" value="{{ current_preferences.mqttport }}"></td>
+            <td>Constraints: 1 to 65535</td>
+        </tr>
+        <tr>
+            <td>MQTT User Name</td>
+            <td><input type="text" name="mqttuser" value="{{ current_preferences.mqttuser }}"></td>
+            <td>User name for authenticating with broker. Leave blank for no authentication</td>
+        </tr>
+        <tr>
+            <td>MQTT Password</td>
+            <td><input type="text" name="mqttpassword" value="{{ current_preferences.mqttpassword }}"></td>
+            <td>Password for authenticating with broker</td>
+        </tr>
+        <tr>
+            <td>Publish Recordings?</td>
+            <td><input type="text" name="mqttrecordings" value="{{ current_preferences.mqttrecordings }}"></td>
+            <td>Set to true to include recordings, if stored, in MQTT publications</td>
+        </tr>
     </table>
     <br>
     <input type="submit" value="Set Preferences">
