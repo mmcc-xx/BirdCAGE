@@ -19,15 +19,11 @@ from .filter_functions import update_birdsoftheweek_table, create_birdsoftheweek
 import subprocess
 from .notify import notify
 from .recordingcleanup import recordingcleanup
+from .mqttpub import start_mqtt_client, mqttpublish
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 DETECTION_DIR = os.path.join(basedir, '..', DETECTION_DIR_NAME)
 TEMP_DIR = os.path.join(basedir, '..', TEMP_DIR_NAME)
-
-
-@shared_task(name='update_birdsoftheweek_table_task')
-def update_birdsoftheweek_table_task():
-    update_birdsoftheweek_table()
 
 
 def get_youtube_stream_url(youtube_video_url, format_code=None):
@@ -51,9 +47,9 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
         if protocol == 'rtsp':
             (
                 ffmpeg
-                .input(stream_url, rtsp_transport=transport.lower())
-                .output(output_filename, format='wav', t=seconds, loglevel='warning')
-                .run()
+                    .input(stream_url, rtsp_transport=transport.lower())
+                    .output(output_filename, format='wav', t=seconds, loglevel='warning')
+                    .run()
             )
 
         elif protocol == 'youtube':
@@ -61,17 +57,17 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
             if youtube_stream_url is None:
                 return {'status': 'failure', 'error': 'error getting youtube url'}
             (
-                ffmpeg  
-                .input(youtube_stream_url)
-                .output(output_filename, format='wav', t=seconds, loglevel='warning')  
-                .run()
+                ffmpeg
+                    .input(youtube_stream_url)
+                    .output(output_filename, format='wav', t=seconds, loglevel='warning')
+                    .run()
             )
         else:
             (
                 ffmpeg
-                .input(stream_url)
-                .output(output_filename, format='wav', t=seconds, loglevel='warning')
-                .run()
+                    .input(stream_url)
+                    .output(output_filename, format='wav', t=seconds, loglevel='warning')
+                    .run()
             )
         return {'status': 'success', 'filepath': output_filename}
     except ffmpeg.Error as e:
@@ -81,7 +77,6 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
 
 @shared_task
 def record_stream(stream, preferences):
-
     app = current_app._get_current_object()
     celery = app.celery
 
@@ -143,8 +138,7 @@ def sendRequest(fpath, mdata):
         return {'msg': 'fail'}
 
 
-def check_results(results, filepath, recording_metadata, preferences):
-
+def check_results(results, filepath, recording_metadata, preferences, mqttclient):
     confidence_target = float(preferences['confidence'])
     # Load the wav file
     wav_audio = AudioSegment.from_wav(filepath)
@@ -184,7 +178,7 @@ def check_results(results, filepath, recording_metadata, preferences):
 
                     recordinglength = int(preferences['recordinglength'])
                     extractionlength = int(preferences['extractionlength'])
-                    spacelength = (extractionlength - 3)/2
+                    spacelength = (extractionlength - 3) / 2
                     startwithspace = start_time - spacelength
                     if startwithspace < 0:
                         startwithspace = 0
@@ -209,17 +203,20 @@ def check_results(results, filepath, recording_metadata, preferences):
                     add_detection(timestamp, stream_id, streamname, scientific_name, common_name, confidence_score,
                                   '')
 
-                else: # if detection action is record or alert
+                else:  # if detection action is record or alert
                     add_detection(timestamp, stream_id, streamname, scientific_name, common_name, confidence_score,
-                              mp3_filename)
+                                  mp3_filename)
 
                 notify(detectionaction, timestamp, stream_id, streamname, scientific_name, common_name,
                        confidence_score, mp3path)
 
+                mqttpublish(mqttclient, preferences, detectionaction, timestamp,
+                            streamname, scientific_name, common_name,
+                            confidence_score, mp3path)
+
 
 @shared_task()
 def analyze_recordings():
-
     app = current_app._get_current_object()
     celery = app.celery
 
@@ -229,6 +226,10 @@ def analyze_recordings():
 
     preferences = get_all_user_preferences(0)
     last_cleanup_time = datetime.now()
+    last_keepalive_time = datetime.now()
+
+    # start the mqtt client
+    mqttclient = start_mqtt_client(preferences)
 
     # This loop will look for wav files, analyze them, sleep a bit and then do it again
     while True:
@@ -284,7 +285,7 @@ def analyze_recordings():
                 analysis = sendRequest(file_path, json.dumps(mdata))
                 if analysis['msg'] == 'success':
                     # print(analysis, flush=True)
-                    check_results(analysis['results'], file_path, recording_metadata, preferences)
+                    check_results(analysis['results'], file_path, recording_metadata, preferences, mqttclient)
 
                     # That file has been analyzed and results stored. Delete it and its metadata record
                     if os.path.exists(file_path):
@@ -301,13 +302,16 @@ def analyze_recordings():
                 # Call the recordingcleanup function and update the last_cleanup_time
                 recordingcleanup(recording_retention)
 
+            # this is also a good time to update the birds o the week
+            update_birdsoftheweek_table()
+
+            # get new last_cleanup_time
             last_cleanup_time = datetime.now()
 
         time.sleep(1)
 
 
 def process_streams():
-
     # initialize the table of expected birds
     create_birdsoftheweek_table()
     update_birdsoftheweek_table()
