@@ -6,6 +6,13 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- I just pushed new images with a couple of bug fixes. One was where the functionality that was supposed to delete recordings
+older than your retection configuration didn't actually delete them, but it did delete the pointers to them in the database. Oops.
+You might want to go to your detection directory and execute this command, replacing 3 with your number of days of retention...
+```
+find ./ -type f -mtime +3 -exec rm {} \;
+```
+- The push also includes MQTT configuration but not the actual MQTT functionality.
 - I have a highly credible report of BirdCAGE successfully runnong on a Raspberry Pi 4! This particular Pi was running the latest
 DietPi OS, but it _should_ work on any 64 bit Linux. It _should_ also work on other arm64 based machines. Please try it out and if it
 doesn't work, open an issue. If it does work, please post in the discussions forum.
@@ -17,8 +24,6 @@ entries are kept as as they are pretty tiny.
 for up to 3 notifications services per the Apprise documentation, and associate those services with the Log, Record and Alert
 detection levels defined in the Filter Settings. I tried MQTT and email via gmail and both worked. Note: this does not replace
 a real MQTT interface which I'm planning to work on real soon now.
-- Added locale support for results. The UI is still just english, but you can get back common names in other language. See
-the Locale setting in Preferences. After you change it, restart the application.
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide
