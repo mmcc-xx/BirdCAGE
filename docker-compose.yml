@@ -6,7 +6,8 @@ services:
   # with an image they maintain in the future
   birdnetserver:
     restart: unless-stopped
-    image: mmcc73/birdnetserver:latest
+    image: mmcc73/birdnetserver:latest # If you are running on an arm64 machine, like a Pi 4, 
+                                       # use mmcc73/birdnetserver_arm64:latest as the image name
     ports:
       - "7667:8080"
 

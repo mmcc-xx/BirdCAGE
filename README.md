@@ -6,8 +6,11 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
-- Added a preference for how long to retain recordings, and once a day delete all recordings older than that. I keep the database
-entries as they are pretty tiny.
+- I have a highly credible report of BirdCAGE successfully runnong on a Raspberry Pi 4! This particular Pi was running the latest
+DietPi OS, but it _should_ work on any 64 bit Linux. It _should_ also work on other arm64 based machines. Please try it out and if it
+doesn't work, open an issue. If it does work, please post in the discussions forum.
+- Added a preference for how long to retain recordings, and once a day delete all recordings older than that. Database
+entries are kept as as they are pretty tiny.
 - Made the grid on the index page a little nicer, especially for small screens. Future hours aren't show, and the column and row headers are
 "sticky" when you scroll around.
 - Added notifications via Apprise. You'll see a new pick under the Settings window for Notifications Settings. Put in URLs
@@ -16,8 +19,6 @@ detection levels defined in the Filter Settings. I tried MQTT and email via gmai
 a real MQTT interface which I'm planning to work on real soon now.
 - Added locale support for results. The UI is still just english, but you can get back common names in other language. See
 the Locale setting in Preferences. After you change it, restart the application.
-- I pushed images for the arm64 platform. If someone could try it out on a Pi 4 or similar and open up an issue if it doesn't work (or a 
-discussion entry if it does) that would be great.
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide
@@ -55,7 +56,7 @@ in luck: your latitude and longitude are already set.
 - Consider changing the default password. Or don't.
 - Did the above not work?
     - See if you can go to whatever you set as your API_SERVER_URL in your browser. You should see a (very incomplete) UI of API documentation.
-    If not, the back end / API server is not exposed to the network correctly or the docket-compose file isn't configured correctly. Or both.
+    If not, the back end / API server is not exposed to the network correctly or the docker-compose file isn't configured correctly. Or both.
     - If that works, go back to the Preferences page, hit F12 and see if there are any client side scripting errors. All of the API
     calls are done in client side scriping in the browser to keep things snappy. If you are accessing the Web UI through a name via a reverse
     proxy, that name needs to be added to the CORS_ORIGINS environment variable in docker-compose.yml, you need to set a name for the back end/API server, and that name
