@@ -1,6 +1,6 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 import requests
-from datetime import datetime
+from datetime import datetime, date
 import os
 
 app = Flask(__name__)
@@ -69,6 +69,20 @@ def login():
 @app.route('/notification_settings', methods=['GET'])
 def notification_settings():
     return render_template('notifications_settings.html', api_server_url=API_SERVER_URL)
+
+
+@app.route('/weekly_report/', defaults={'week': None})
+@app.route('/weekly_report/<week>')
+def weekly_report(week):
+    if not week:
+        today = date.today()
+        year, week_number, _ = today.isocalendar()
+        week = f"{year}-W{week_number}"
+
+        # Redirect to the URL with the current week
+        return redirect(url_for('weekly_report', week=week))
+
+    return render_template('weekly_report.html', week=week, api_server_url=API_SERVER_URL)
 
 
 if __name__ == '__main__':

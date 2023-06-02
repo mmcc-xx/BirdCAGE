@@ -101,3 +101,28 @@
   overflow-x: visible !important;
   overflow-y: visible !important;
 }
+
+/* Add light-colored column dividers between the days of the week columns */
+#report-table td:not(:first-child):not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.1); /* Change 0.1 to adjust the opacity */
+}
+
+/* Remove the right border from the last day of the week column */
+#report-table td:last-child {
+    border-right: none;
+}
+
+/* Style the clickable cells */
+#report-table td a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    padding: 4px; /* Add some padding for better clickability */
+}
+
+/* Change the color of the link when hovered */
+#report-table td a:hover {
+    color: #007bff; /* Change this to your desired hover color */
+    cursor: pointer;
+    text-decoration: underline;
+}

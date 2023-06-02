@@ -240,16 +240,25 @@ def get_detections_by_day_and_hour(date):
     connection = sqlite3.connect(DATABASE_FILE)
     cursor = connection.cursor()
 
-    cursor.execute("""    
-        SELECT common_name,    
-               strftime('%Y-%m-%d', timestamp) AS date,    
-               strftime('%H', timestamp) AS hour,    
-               COUNT(*) AS count    
-        FROM detections    
-        WHERE date(timestamp) = date(?)    
-        GROUP BY common_name, date, hour    
-        ORDER BY count DESC, common_name, hour    
-    """, (date,))
+    cursor.execute("""      
+        SELECT d.common_name,      
+               strftime('%Y-%m-%d', d.timestamp) AS date,      
+               strftime('%H', d.timestamp) AS hour,      
+               COUNT(*) AS count,  
+               t.total_count  
+        FROM detections d  
+        JOIN (  
+            SELECT common_name,  
+                   COUNT(*) AS total_count  
+            FROM detections  
+            WHERE date(timestamp) = date(?)  
+            GROUP BY common_name  
+        ) t ON d.common_name = t.common_name  
+        WHERE date(d.timestamp) = date(?)  
+        GROUP BY d.common_name, date, hour      
+        ORDER BY t.total_count DESC, d.common_name, hour      
+    """, (date, date,))
+
 
     data = cursor.fetchall()
     # print("here's data in count_by_hour:")
@@ -336,3 +345,42 @@ def get_detection_by_id(id):
     }
 
     return jsonify(detection_data)
+
+
+@detections_blueprint.route('/api/detections/date_range_report/<start_date>/<end_date>')
+def get_date_range_report(start_date, end_date):
+    connection = sqlite3.connect(DATABASE_FILE)
+    cursor = connection.cursor()
+
+    cursor.execute('''  
+        WITH daily_counts AS (  
+            SELECT common_name,  
+                   date(timestamp) AS date,  
+                   COUNT(*) AS daily_count  
+            FROM detections  
+            WHERE date(timestamp) BETWEEN date(?) AND date(?)  
+            GROUP BY common_name, date  
+        ),  
+        total_counts AS (  
+            SELECT common_name,  
+                   COUNT(*) AS total_count  
+            FROM detections  
+            WHERE date(timestamp) BETWEEN date(?) AND date(?)  
+            GROUP BY common_name  
+        )  
+        SELECT dc.common_name,  
+               tc.total_count,  
+               dc.date,  
+               dc.daily_count  
+        FROM daily_counts dc  
+        JOIN total_counts tc ON dc.common_name = tc.common_name  
+        ORDER BY tc.total_count DESC, dc.common_name, dc.date  
+    ''', (start_date, end_date, start_date, end_date))
+
+    results = cursor.fetchall()
+    column_names = [description[0] for description in cursor.description]
+    report_data = [dict(zip(column_names, result)) for result in results]
+
+    connection.close()
+
+    return jsonify(report_data)

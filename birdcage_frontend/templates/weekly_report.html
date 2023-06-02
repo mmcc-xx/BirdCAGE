@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+{% endblock %}
+
+{% block title %}
+Weekly Report
+{% endblock %}
+
+{% block content %}
+<h2 id="report-title">Detection Report for the Week of</h2>
+<input type="text" id="week-picker" value="{{ week }}">
+<table class="table table-striped" id="report-table">
+    <thead>
+    <tr>
+        <th>Common Name</th>
+        <th>Total Detections</th>
+        <th>Mon</th>
+        <th>Tue</th>
+        <th>Wed</th>
+        <th>Thu</th>
+        <th>Fri</th>
+        <th>Sat</th>
+        <th>Sun</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const weekPicker = document.getElementById("week-picker");
+    const reportTitle = document.getElementById("report-title");
+    const reportTable = document.getElementById("report-table");
+    const apiServerUrl = "{{ api_server_url }}";
+
+    function formatDate(date) {
+        return new Date(date).toISOString().slice(0, 10);
+    }
+
+    function getMonday(d) {
+        d = new Date(d);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    }
+
+    function getDatesFromWeek(weekString) {
+        const [year, week] = weekString.split('-W');
+
+        // Calculate the start of the week (Monday)
+        const start = new Date(year, 0, (week) * 7 + 1);
+        start.setDate(start.getDate() - (start.getDay() + 6) % 7);
+
+        // Calculate the end of the week (Sunday)
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+
+        return {start, end};
+    }
+
+    function getDayLabel(dateString) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        const dayIndex = (date.getDay() + 6) % 7; // Get the index (0-6) starting from Monday
+        return days[dayIndex];
+    }
+
+    function updateReport() {
+
+        const {start: weekStart, end: weekEnd} = getDatesFromWeek(weekPicker.value);
+
+        reportTitle.textContent = `Detection Report for the Week of ${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
+
+        fetch(`${apiServerUrl}/api/detections/date_range_report/${formatDate(weekStart)}/${formatDate(weekEnd)}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableData = {};
+
+                for (const row of data) {
+                    if (!tableData[row.common_name]) {
+                        tableData[row.common_name] = {
+                            total: row.total_count,
+                            daily: {}
+                        };
+                    }
+                    tableData[row.common_name].daily[getDayLabel(row.date)] = row.daily_count;
+                }
+
+                const tbody = reportTable.querySelector("tbody");
+                tbody.innerHTML = "";
+
+                for (const [commonName, counts] of Object.entries(tableData)) {
+                    const tr = document.createElement("tr");
+
+tr.innerHTML = `
+    <td>${commonName}</td>
+    <td>${counts.total}</td>
+    ${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => {
+        const dailyCount = counts.daily[day];
+        if (dailyCount) {
+            return `<td><a href="/detections/by_common_name/${data.find(item => item.common_name === commonName && getDayLabel(item.date) === day).date}/${encodeURIComponent(commonName)}">${dailyCount}</a></td>`;
+        } else {
+            return '<td></td>';
+        }
+    }).join("")}
+`;
+
+                    tbody.appendChild(tr);
+                }
+                initializeDataTables();
+            });
+    }
+
+
+    function getWeekNumber(date) {
+        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+        const dayOfYear = (date - firstDayOfYear + (86400000 /* ms per day */ * (firstDayOfYear.getDay() + 1))) / 86400000;
+        return Math.ceil(dayOfYear / 7);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        flatpickr('#week-picker', {
+            weekNumbers: true,
+            dateFormat: 'Y-\\WW',
+            defaultDate: getMondayOfWeek("{{ week }}"),
+            onChange: function (selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    const selectedDate = selectedDates[0];
+                    const selectedWeek = selectedDate.getFullYear() + "-W" + getWeekNumber(selectedDate);
+                    instance.input.value = selectedWeek;
+                    // Redirect to the new URL for the selected week
+                    const newUrl = `/weekly_report/${selectedWeek}`;
+                    window.location.href = newUrl;
+                }
+            }
+        });
+    });
+
+    function getMondayOfWeek(weekString) {
+        const [year, week] = weekString.split('-W');
+        const date = new Date(year, 0, (week) * 7 + 1);
+        date.setDate(date.getDate() - (date.getDay() + 6) % 7);
+        return date;
+    }
+
+    function initializeDataTables() {
+        $('#report-table').DataTable({
+            "order": [[1, "desc"]], // Sort by Total Detections column (index 1), descending order
+            "pageLength": 25 // Display 15 rows per page
+        });
+    }
+
+    setTimeout(updateReport, 250);
+</script>
+{% endblock %}
