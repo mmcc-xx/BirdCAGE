@@ -113,10 +113,13 @@ Monthly Report
                         const dailyCount = counts.daily[day];
                         if (dailyCount) {
                             const barHeight = (dailyCount / maxDailyCount) * 100;
+                            // Pad the month and day with zeros
+                            const paddedMonth = String(month).padStart(2, '0');
+                            const paddedDay = String(day).padStart(2, '0');
                             dailyColumns.push(`
                                 <td class="day-cell">
                                     <div class="bar" style="height: ${barHeight}%"></div>
-                                    <a href="/detections/by_common_name/${encodeURIComponent(commonName)}/${year}-${month}-${day}">${dailyCount}</a>
+                                    <a href="/detections/by_common_name/${encodeURIComponent(commonName)}/${year}-${paddedMonth}-${paddedDay}">${dailyCount}</a>
                                 </td>`);
                         } else {
                             dailyColumns.push('<td class="day-cell"></td>');
