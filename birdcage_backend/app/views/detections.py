@@ -320,6 +320,26 @@ def get_detections_by_common_name(date, common_name):
     return jsonify(detections)
 
 
+@detections_blueprint.route('/api/detections/by_common_name/<common_name>/<start_date>/<end_date>')
+def get_detections_by_common_name_and_date_range(common_name, start_date, end_date):
+    connection = sqlite3.connect(DATABASE_FILE)
+    cursor = connection.cursor()
+
+    cursor.execute('''      
+        SELECT * FROM detections      
+        WHERE common_name = ? AND timestamp BETWEEN ? AND ?      
+        ORDER BY timestamp ASC      
+    ''', (common_name, start_date, end_date))
+
+    results = cursor.fetchall()
+    column_names = [description[0] for description in cursor.description]
+    detections = [dict(zip(column_names, result)) for result in results]
+
+    connection.close()
+
+    return jsonify(detections)
+
+
 @detections_blueprint.route('/api/detections/detection/<int:id>', methods=['GET'])
 def get_detection_by_id(id):
     connection = sqlite3.connect(DATABASE_FILE)

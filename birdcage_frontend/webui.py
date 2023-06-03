@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for
 import requests
 from datetime import datetime, date
 import os
+from calendar import monthrange
 
 app = Flask(__name__)
 
@@ -23,9 +24,10 @@ def show_detections_by_hour(date, hour):
     return render_template('detections_by_hour.html', date=date, api_server_url=API_SERVER_URL, hour=hour)
 
 
-@app.route('/detections/by_common_name/<date>/<common_name>')
-def show_detections_by_common_name(date, common_name):
-    return render_template('detections_by_name.html', api_server_url=API_SERVER_URL, date=date, common_name=common_name)
+@app.route('/detections/by_common_name/<common_name>/<date>', defaults={'end_date': None})
+@app.route('/detections/by_common_name/<common_name>/<date>/<end_date>')
+def show_detections_by_common_name(common_name, date, end_date):
+    return render_template('detections_by_name.html', api_server_url=API_SERVER_URL, common_name=common_name, date=date, end_date=end_date)
 
 
 @app.route('/daily_summary/<date>')
@@ -83,6 +85,21 @@ def weekly_report(week):
         return redirect(url_for('weekly_report', week=week))
 
     return render_template('weekly_report.html', week=week, api_server_url=API_SERVER_URL)
+
+
+@app.route('/monthly_report/', defaults={'month': None})
+@app.route('/monthly_report/<month>')
+def monthly_report(month):
+    if not month:
+        today = date.today()
+        year = today.year
+        month_number = today.month
+        month = f"{year}-{month_number:02d}"
+
+        # Redirect to the URL with the current month
+        return redirect(url_for('monthly_report', month=month))
+
+    return render_template('monthly_report.html', month=month, api_server_url=API_SERVER_URL)
 
 
 if __name__ == '__main__':

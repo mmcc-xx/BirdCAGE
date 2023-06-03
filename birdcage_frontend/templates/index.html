@@ -39,7 +39,7 @@
                 <div class="table-responsive">
                     <table class="table table-fixed-header" id="detections-by-day-and-hour-table">
                         <thead>
-                          <tr class-="sticky-header">
+                          <tr class="sticky-header">
                             <th class="common-name-col">Common Name</th>
                             <!-- The header columns for hours will be generated through JavaScript -->
                           </tr>
@@ -240,7 +240,7 @@
                 // Add common_name cell
                 const commonNameCell = document.createElement('td');
                 const commonNameLink = document.createElement('a');
-                commonNameLink.href = `/detections/by_common_name/${today}/${encodeURIComponent(rowData.common_name)}`;
+                commonNameLink.href = `/detections/by_common_name/${encodeURIComponent(rowData.common_name)}/${today}`;
                 commonNameLink.textContent = rowData.common_name;
                 commonNameLink.classList.add('link-dark');
                 commonNameCell.appendChild(commonNameLink);

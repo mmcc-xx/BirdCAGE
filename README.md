@@ -6,6 +6,7 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- Prettied up the daily summary and weekly report and added a monthly report
 - Added a Weekly report. Lemme know how you like it. I plan to add monthly and annual, as well as specific bird species reports.
 - MQTT support, with MP3s optionally included. Specify your MQTT server, port, etc. in Preferences and restart the app. The topic
 structure is BirdCAGE/(log, record, or alert)/(stream name). The payload is a JSON doc with the pertinent information about
@@ -21,8 +22,7 @@ DietPi OS, but it _should_ work on any 64 bit Linux. It _should_ also work on ot
 doesn't work, open an issue. If it does work, please post in the discussions forum.
 - Added a preference for how long to retain recordings, and once a day delete all recordings older than that. Database
 entries are kept as as they are pretty tiny.
-- Made the grid on the index page a little nicer, especially for small screens. Future hours aren't show, and the column and row headers are
-"sticky" when you scroll around.
+
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide

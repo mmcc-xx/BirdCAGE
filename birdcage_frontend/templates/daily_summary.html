@@ -103,7 +103,7 @@
                         // Add common_name cell
                         const commonNameCell = document.createElement('td');
                         const commonNameLink = document.createElement('a');
-                        commonNameLink.href = `/detections/by_common_name/${SELECTED_DATE}/${encodeURIComponent(rowData.common_name)}`;
+                        commonNameLink.href = `/detections/by_common_name/${encodeURIComponent(rowData.common_name)}/${SELECTED_DATE}`;
                         commonNameLink.textContent = rowData.common_name;
                         commonNameLink.classList.add('link-dark');
                         commonNameCell.appendChild(commonNameLink);

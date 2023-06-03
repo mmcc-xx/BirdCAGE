@@ -1,26 +1,32 @@
 {% extends "base.html" %}
 
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+{% endblock %}
+
 {% block title %}
-  Detections for {{ common_name }} on {{ date }}
+  Detections for {{ common_name }}, {{ date }}{% if end_date %} to {{ end_date }}{% endif %}
 {% endblock %}
 
 {% block content %}
         <div class="row">
             <div class="col-12 text-center">
-                <h1 class="my-4">Detections for {{ common_name }} on {{ date }}</h1>
+                <h1 class="my-4">Detections for {{ common_name }}, {{ date }}{% if end_date %} to {{ end_date }}{% endif %}</h1>
             </div>
         </div>
 
         <div class="row">
             <div class="col-12">
                 <div class="table-responsive">
-                    <table class="table" id="detections-by-common-name-table">
+                    <table class="table table-striped table-fixed-header" id="detections-by-common-name-table">
                         <thead>
-                            <tr>
+                            <tr class="sticky-header">
                                 <th>Time</th>
                                 <th>Stream Name</th>
                                 <th>Confidence</th>
-                                <th>Audio</th>
+                                <th class="d-none d-md-table-cell">Audio</th>
                                 <th>Spectrogram</th>
                             </tr>
                         </thead>
@@ -37,19 +43,37 @@
         const API_SERVER_URL = "{{ api_server_url }}";
         const formattedDate = "{{ date }}";
         const commonName = "{{ common_name }}";
+        const endDate = {{ end_date|tojson|default("null", true) }};
 
         function formatTimestamp(timestamp) {
             const date = new Date(timestamp);
+            const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
-            return `${hours}:${minutes}`;
+
+            // If endDate is defined, include year-month-day in the formatted date
+            if (endDate) {
+                return `${year}-${month}-${day} ${hours}:${minutes}`;
+            } else {
+                return `${hours}:${minutes}`;
+            }
         }
 
 
+
         function updateDetectionsByCommonNameTable() {
-            fetch(`{{ api_server_url }}/api/detections/by_common_name/${formattedDate}/${encodeURIComponent(commonName)}`)
+
+            let apiUrl;
+
+            if (endDate) {
+                apiUrl = `${API_SERVER_URL}/api/detections/by_common_name/${encodeURIComponent(commonName)}/${formattedDate}/${endDate}`;
+            } else {
+                apiUrl = `${API_SERVER_URL}/api/detections/by_common_name/${formattedDate}/${encodeURIComponent(commonName)}`;
+            }
+
+            fetch(apiUrl)
                 .then(response => response.json())
                 .then(detections => {
                     const tableBody = document.querySelector('#detections-by-common-name-table tbody');
@@ -79,6 +103,7 @@
                             audioPlayer.src = `${API_SERVER_URL}/api/audio-files/${detection.filename}`;
                             audioCell.appendChild(audioPlayer);
                         }
+                        audioCell.classList.add('d-none', 'd-md-table-cell');
                         row.appendChild(audioCell);
 
                         // Add image widget
@@ -97,7 +122,19 @@
 
                         tableBody.appendChild(row);
                     });
+                initializeDataTables();
                 });
+        }
+
+        function initializeDataTables() {
+            $('#detections-by-common-name-table').DataTable({
+                "order": [[0, "asc"]],
+                "pageLength": 10, // Display 10 rows per page
+                "columnDefs": [
+                    {"orderable": false, "targets": [3, 4]} // Disable sorting for columns 3 (Audio) and 4 (Spectrogram)
+                ],
+                "responsive": true
+            });
         }
 
         updateDetectionsByCommonNameTable();
