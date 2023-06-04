@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<style>
+    th a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    th a:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .bar {
+        display: inline-block;
+        width: calc((100% / 31) - 1px);
+        background-color: rgba(0, 123, 255, 0.2);
+        margin-right: 1px;
+    }
+
+    .bar-cell {
+        height: 70px;
+        /*display: flex;*/
+        flex-direction: column;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .bar-wrapper {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        height: 100%;
+        width: 100%;
+    }
+    .bar-total {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 12px;
+        color: #333;
+        width: 100%;
+        line-height: 100px; /* Same as the height of the .bar-cell */
+        /*pointer-events: none; /* To allow clicks through this div */
+    }
+    .bar-total a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .bar-total a:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+</style>
+
+
+{% endblock %}
+
+{% block title %}
+Annual Report
+{% endblock %}
+
+{% block content %}
+<h2 id="report-title">Detection Report for {{ year }}</h2>
+<h3 id="report-summary">Total Detections: 0 | Unique Species: 0</h3>
+<input type="text" id="year-picker" value="{{ year }}">
+<div class="table-responsive">
+    <table class="table table-striped table-fixed-header" id="report-table">
+        <thead>
+            <tr class="sticky-header" id="table-header">
+                <th>Common Name</th>
+                <th>Total Detections</th>
+{% set month_abbreviations = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+{% for month in range(1, 13) %}
+    <th>
+        <a href="/monthly_report/{{ year }}-{{ '%02d'|format(month) }}">{{ month_abbreviations[month - 1] }}</a>
+    </th>
+{% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const yearPicker = document.getElementById("year-picker");
+    const reportTitle = document.getElementById("report-title");
+    const reportTable = document.getElementById("report-table");
+    const apiServerUrl = "{{ api_server_url }}";
+
+function updateReport() {
+            const year = yearPicker.value;
+        reportTitle.textContent = `Detection Report for ${year}`;
+
+    fetch(`${apiServerUrl}/api/detections/annual-report/${year}`)
+        .then(response => response.json())
+        .then(data => {
+            let totalDetections = 0;
+            let uniqueSpecies = new Set();
+            let maxDailyCount = 0;
+            const tableData = {};
+
+            for (const row of data) {
+                const month = row.month;
+                const day = row.day;
+                maxDailyCount = Math.max(maxDailyCount, row.count);
+
+                if (!tableData[row.common_name]) {
+                    tableData[row.common_name] = {
+                        total: 0,
+                        monthly: {}
+                    };
+                }
+
+                if (!tableData[row.common_name].monthly[month]) {
+                    tableData[row.common_name].monthly[month] = {
+                        total: 0,
+                        daily: Array(31).fill(0)
+                    };
+                }
+
+                tableData[row.common_name].total += row.count;
+                tableData[row.common_name].monthly[month].total += row.count;
+                tableData[row.common_name].monthly[month].daily[parseInt(day) - 1] = row.count;
+
+                totalDetections += row.count;
+                uniqueSpecies.add(row.common_name);
+            }
+
+            uniqueSpecies = uniqueSpecies.size;
+
+            const reportSummary = document.getElementById("report-summary");
+            reportSummary.textContent = `Total Detections: ${totalDetections} | Unique Species: ${uniqueSpecies}`;
+
+            const tbody = reportTable.querySelector("tbody");
+            tbody.innerHTML = "";
+
+            for (const [commonName, counts] of Object.entries(tableData)) {
+                const tr = document.createElement("tr");
+
+                const monthlyColumns = [];
+                for (let month = 1; month <= 12; month++) {
+                    const paddedMonth = String(month).padStart(2, '0');
+                    const monthData = counts.monthly[paddedMonth] || { daily: Array(31).fill(0) };
+                    //console.log(`Common Name: ${commonName}, Month: ${paddedMonth}, Daily data:`, monthData.daily);
+                    const dailyBars = monthData.daily.map((dailyCount, day) => {
+                        const barHeight = (dailyCount / maxDailyCount) * 100;
+                        //console.log(`Common Name: ${commonName}, Month: ${paddedMonth}, Day: ${day + 1}, Bar Height: ${barHeight}%`);
+                        return `<div class="bar" style="height: ${barHeight}%"></div>`;
+                    }).join('');
+                    const totalCountDiv = monthData.total !== undefined ? `<div class="bar-total"><a href="/detections/by_common_name/${encodeURIComponent(commonName)}/${year}-${paddedMonth}-01/${year}-${paddedMonth}-${new Date(year, month, 0).getDate()}">${monthData.total}</a></div>` : '';
+                    monthlyColumns.push(`<td class="bar-cell"><div class="bar-wrapper">${dailyBars}${totalCountDiv}</div></td>`);
+                }
+
+                tr.innerHTML = `
+                    <td>${commonName}</td>
+                    <td>${counts.total}</td>
+                    ${monthlyColumns.join("")}
+                `;
+
+                tbody.appendChild(tr);
+            }
+
+            initializeDataTables();
+        });
+}
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        flatpickr('#year-picker', {
+            dateFormat: 'Y',
+            defaultDate: "{{ year }}",
+            onChange: function (selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    const newUrl = `/annual_report/${dateStr}`;
+                    window.location.href = newUrl;
+                }
+            }
+        });
+    });
+
+    function initializeDataTables() {
+        $('#report-table').DataTable({
+            "order": [[1, "desc"]], // Sort by Total Detections column (index 1), descending order
+            "pageLength": 10 // Display 10 rows per page
+        });
+    }
+
+    setTimeout(updateReport, 250);
+</script>
+{% endblock %}
+
+

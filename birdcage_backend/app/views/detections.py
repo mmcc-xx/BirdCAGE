@@ -404,3 +404,32 @@ def get_date_range_report(start_date, end_date):
     connection.close()
 
     return jsonify(report_data)
+
+
+def fetch_annual_report(year):
+    with sqlite3.connect(DATABASE_FILE) as conn:
+        cursor = conn.cursor()
+        query = """  
+        SELECT   
+            common_name,   
+            strftime('%m', date) AS month,   
+            strftime('%d', date) AS day,   
+            count   
+        FROM   
+            daily_detections  
+        WHERE   
+            strftime('%Y', date) = ?  
+        ORDER BY   
+            common_name, month, day;  
+        """
+        cursor.execute(query, (year,))
+        return cursor.fetchall()
+
+
+@detections_blueprint.route('/api/detections/annual-report/<year>')
+def get_annual_report(year):
+    data = fetch_annual_report(year)
+    column_names = ['common_name', 'month', 'day', 'count']
+    annual_report_data = [dict(zip(column_names, row)) for row in data]
+
+    return jsonify(annual_report_data)

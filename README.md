@@ -6,23 +6,12 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- Added annual report. Also, BirdNET released a new model - I need to look into what it will take to pick that up.
 - Prettied up the daily summary and weekly report and added a monthly report
 - Added a Weekly report. Lemme know how you like it. I plan to add monthly and annual, as well as specific bird species reports.
 - MQTT support, with MP3s optionally included. Specify your MQTT server, port, etc. in Preferences and restart the app. The topic
 structure is BirdCAGE/(log, record, or alert)/(stream name). The payload is a JSON doc with the pertinent information about
 the detection. So if you want to listen for all alert level detections on all cameras, you'd subscribe to BirdCAGE/alert/#
-- I just pushed new images with a couple of bug fixes. One was where the functionality that was supposed to delete recordings
-older than your retection configuration didn't actually delete them, but it did delete the pointers to them in the database. Oops.
-You might want to go to your detection directory and execute this command, replacing 3 with your number of days of retention...
-```
-find ./ -type f -mtime +3 -exec rm {} \;
-```
-- I have a highly credible report of BirdCAGE successfully running on a Raspberry Pi 4! This particular Pi was running the latest
-DietPi OS, but it _should_ work on any 64 bit Linux. It _should_ also work on other arm64 based machines. Please try it out and if it
-doesn't work, open an issue. If it does work, please post in the discussions forum.
-- Added a preference for how long to retain recordings, and once a day delete all recordings older than that. Database
-entries are kept as as they are pretty tiny.
-
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide

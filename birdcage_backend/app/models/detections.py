@@ -11,11 +11,21 @@ def create_detections_table():
                       timestamp TIMESTAMP NOT NULL,  
                       stream_id INTEGER NOT NULL,  
                       streamname TEXT NOT NULL,  
-                      scientific_name TEXT NOT NULL,
-                      common_name TEXT NOT NULL,
-                      confidence FLOAT NOT NULL,
-                      filename TEXT NOT NULL
+                      scientific_name TEXT NOT NULL,  
+                      common_name TEXT NOT NULL,  
+                      confidence FLOAT NOT NULL,  
+                      filename TEXT NOT NULL  
                       )''')
+
+    cursor.execute('''CREATE VIEW IF NOT EXISTS daily_detections AS  
+                      SELECT  
+                          date(timestamp) AS date,  
+                          common_name,  
+                          COUNT(*) AS count  
+                      FROM  
+                          detections  
+                      GROUP BY  
+                          date(timestamp), common_name;''')
 
     connection.commit()
     connection.close()

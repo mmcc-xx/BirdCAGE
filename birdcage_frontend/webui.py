@@ -102,5 +102,17 @@ def monthly_report(month):
     return render_template('monthly_report.html', month=month, api_server_url=API_SERVER_URL)
 
 
+@app.route('/annual_report/', defaults={'year': None})
+@app.route('/annual_report/<int:year>')
+def annual_report(year):
+    if not year:
+        today = date.today()
+        year = today.year
+        # Redirect to the URL with the current year
+        return redirect(url_for('annual_report', year=year))
+
+    return render_template('annual_report.html', year=year, api_server_url=API_SERVER_URL)
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(WEBUI_PORT))
