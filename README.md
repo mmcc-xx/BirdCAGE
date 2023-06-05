@@ -6,6 +6,9 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- Pushed an image for V2.4 of the model for amd64 - arm64 will be done in a couple hours. New model is supposed to be more
+better (see the BirdNET-Analyzer repo for infomation) but it is definitely more slower. So V2.3 is still there under the 
+same image name, the new model is at mmcc73/birdnetserverv2.4:latest. This has been noted in the docker-compose file
 - Added annual report. Also, BirdNET released a new model - I need to look into what it will take to pick that up.
 - Prettied up the daily summary and weekly report and added a monthly report
 - Added a Weekly report. Lemme know how you like it. I plan to add monthly and annual, as well as specific bird species reports.
