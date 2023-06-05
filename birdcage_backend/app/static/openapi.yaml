@@ -186,6 +186,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Message'
+
   /audio-files/{filename}:
     get:
       summary: Retrieve an audio file
@@ -228,6 +229,33 @@ paths:
                 items:
                   $ref: '#/components/schemas/Detection'
 
+  /api/detections/annual-report/{year}:
+    get:
+      summary: Retrieve all detections for a given year
+      parameters:
+        - name: year
+          in: path
+          description: Year for which detections should be retrieved (YYYY format)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detections for a given year retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  common_name:
+                    type: string
+                  count:
+                    type: integer
+                  day:
+                    type: string
+                  month:
+                    type: string                  
+
   /api/detections/by_common_name/{date}/{common_name}:
     get:
       summary: Retrieve all detections for a given day for a given common_name
@@ -251,9 +279,54 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Detection'
+                type: object
+                properties:
+                  common_name:
+                    type: string
+                  confidence:
+                    type: integer
+                  filename:
+                    type: string
+                  id:
+                    type: integer
+                  scientific_name:
+                    type: string
+                  stream_id:
+                    type: integer
+                  streamname:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/detections/count_by_hour/{date}:
+    get:
+      summary: Retrieve a count of detections for a given day summarized by common_name and hour.
+      parameters:
+        - name: date
+          in: path
+          description: Date for which detections should be retrieved (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Count of detections for the given day by hour retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  common_name:
+                    type: string
+                  count:
+                    type: integer
+                  date:
+                    type: string
+                    format: date
+                  hour:
+                    type: string  
 
   /api/detections/date/{date}:
     get:
@@ -324,12 +397,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    scientific_name:
-                      type: string
-                    count:
-                      type: integer
+                  $ref: '#/components/schemas/GroupedDetection'
 
   /api/detections/date/{date}/scientific_name/{scientific_name}/confidence:
     get:
@@ -597,7 +665,56 @@ paths:
                 items:
                   $ref: '#/components/schemas/Detection'
 
+  /api/detections/date_range_report/{start_date}/{end_date}:
+    get:
+      summary: Retrieve the detections for the date range Reports (weekly and monthly). Includes daily and total counts.
+      parameters:
+        - name: start_date
+          in: path
+          description: Start date for the date range (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: path
+          description: End date for the date range (YYYY-MM-DD format)
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Detections with in the given range retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  common_name:
+                    type: string
+                  daily_count:
+                    type: integer
+                  date:
+                    type: string
+                    format: date
+                  total_count:
+                    type: integer
 
+  /api/detections/earliest-date:
+    get:
+      summary: Retrieve the date of the earliest recorded detection in the database.
+      responses:
+        '200':
+          description: Earliest date retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  earliest_date:
+                    type: string
+                    format: date-time
 
 components:
   schemas:
@@ -645,3 +762,10 @@ components:
           type: string
       required:
         - message
+    GroupedDetection:
+      type: object
+      properties:
+        scientific_name:
+          type: string
+        count:
+          type: integer
