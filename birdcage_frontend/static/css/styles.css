@@ -90,7 +90,7 @@
 
 .sticky-header th {
   background-color: #f1f1f1;
-  position: -webkit-sticky; // For Safari
+  position: -webkit-sticky; /* For Safari */
   position: sticky;
   top: 0;
   z-index: 100;
