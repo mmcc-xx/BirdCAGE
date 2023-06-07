@@ -8,6 +8,8 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- I just pushed new back end and front end images that provide a more robust mechanism for restarting tasks, and therefore
+loading preference and stream definition changes. More robust here means "doesn't break everyone's installs"
 - Added installation and usage documentation in the Wiki
 - Made it so you don't have the re-start the app for preferences or stream settings changes. You'll see a new button on both of those
 pages. Behind the scenes it stops and restarts the recording and analysis tasks. If you happen to hit that button just as a recording has begun, it could take up

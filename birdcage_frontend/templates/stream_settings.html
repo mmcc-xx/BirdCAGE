@@ -87,7 +87,7 @@
             <tbody>
             </tbody>
         </table>
-
+<button id="apply-preferences">Apply Preferences and Stream Settings</button>
         <div id="message" class="alert" style="display: none;"></div>
 
 {% endblock %}
@@ -252,6 +252,54 @@
 
         getStreams();
     });
+
+document.getElementById('apply-preferences').addEventListener('click', async (event) => {
+    event.preventDefault();
+    await applyRestartCommand(true);
+    document.getElementById('message').textContent = 'Applying...';
+    await waitForRestartToComplete();
+});
+
+async function applyRestartCommand(value) {
+    const api_server_url = "{{ api_server_url }}";
+    const command_name = 'restart';
+    const jwt_token = localStorage.getItem("jwt_token");
+
+    const response = await fetch(`${api_server_url}/api/command/${command_name}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            // Include the token in the Authorization header
+            'Authorization': `Bearer ${jwt_token}`
+        },
+        body: JSON.stringify({ value })
+    });
+
+    if (response.status !== 200) {
+        const errorData = await response.json();
+        throw new Error(`Error: ${response.status} - ${errorData.error}`);
+    }
+}
+
+async function waitForRestartToComplete() {
+    const api_server_url = "{{ api_server_url }}";
+    const command_name = 'restart';
+
+    let restartStatus = true;
+    while (restartStatus) {
+        const response = await fetch(`${api_server_url}/api/command/${command_name}`);
+        if (response.status === 200) {
+            const data = await response.json();
+            restartStatus = data.value;
+        } else {
+            const errorData = await response.json();
+            throw new Error(`Error: ${response.status} - ${errorData.error}`);
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    document.getElementById('message').textContent = 'Applied.';
+}
+
 
     </script>
 

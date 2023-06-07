@@ -1,5 +1,6 @@
 from flask import current_app
 from celery import group, shared_task
+from celery.result import AsyncResult
 from app.views.streams import get_streams_list
 import time
 from datetime import datetime, timedelta
@@ -9,7 +10,8 @@ import ffmpeg
 import uuid
 from app.models.preferences import get_all_user_preferences
 from app.models.detections import add_detection
-from config import ANALYZE_SERVER, ANALYZE_PORT, TEMP_DIR_NAME, DETECTION_DIR_NAME
+from app.models.commands import check_command_value, reset_command
+from config import ANALYZE_SERVER, ANALYZE_PORT, TEMP_DIR_NAME, DETECTION_DIR_NAME, REDIS_SERVER, REDIS_PORT
 import json
 import requests
 from app.models.recording_metadata import set_metadata, get_metadata_by_filename, delete_metadata_by_filename
@@ -20,10 +22,14 @@ import subprocess
 from .notify import notify
 from .recordingcleanup import recordingcleanup
 from .mqttpub import start_mqtt_client, mqttpublish
+from redis import Redis
+import signal
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 DETECTION_DIR = os.path.join(basedir, '..', DETECTION_DIR_NAME)
 TEMP_DIR = os.path.join(basedir, '..', TEMP_DIR_NAME)
+
+redis_client = Redis(host=REDIS_SERVER, port=REDIS_PORT, db=1)
 
 
 def get_youtube_stream_url(youtube_video_url, format_code=None):
@@ -75,10 +81,22 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
         return {'status': 'failure', 'error': str(e)}
 
 
-@shared_task
-def record_stream(stream, preferences):
-    app = current_app._get_current_object()
-    celery = app.celery
+@shared_task(bind=True)
+def record_stream(self, stream, preferences):
+
+    # indicate that the task is running
+    task_id = self.request.id
+    redis_client.hset('task_state', f'{task_id}_status', 'running')
+
+    # set up a handler for SIGTERM signals
+    sigterm_received = [False]
+
+    # Signal handler function
+    def sigterm_handler(signal_number, frame):
+        print(f"SIGTERM received for record_stream task {task_id}, stopping...", flush=True)
+        sigterm_received[0] = True
+
+    signal.signal(signal.SIGTERM, sigterm_handler)
 
     # Create the temp dir if it doesn't exist
     if not os.path.exists(TEMP_DIR):
@@ -93,6 +111,23 @@ def record_stream(stream, preferences):
     seconds = preferences['recordinglength']
 
     while True:
+
+        # check for revocation
+        task_status = AsyncResult(task_id).status
+        if task_status == 'REVOKED':
+            print("record_stream for " + name + " has been revoked", flush=True)
+            break
+
+        # check for sigterm
+        if sigterm_received[0]:
+            print("record_stream for " + name + " got a sigterm", flush=True)
+            break
+
+        # check for signal to stop
+        should_stop = redis_client.hget('task_state', f'{task_id}_stop')
+        if should_stop and should_stop.decode() == 'True':
+            print("record_stream for " + name + " got signal to stop", flush=True)
+            break
 
         # Generate a unique temporary filename
         tmp_filename = TEMP_DIR + f'/{uuid.uuid4().hex}.wav'
@@ -112,6 +147,9 @@ def record_stream(stream, preferences):
 
         # Sleep for some time before recording the stream again
         time.sleep(1)
+
+    # we'll only get here if while loop has been break'ed. Indicate that task is stopped
+    redis_client.hset('task_state', f'{task_id}_status', 'stopped')
 
 
 def sendRequest(fpath, mdata):
@@ -215,10 +253,22 @@ def check_results(results, filepath, recording_metadata, preferences, mqttclient
                             confidence_score, mp3path)
 
 
-@shared_task()
-def analyze_recordings():
-    app = current_app._get_current_object()
-    celery = app.celery
+@shared_task(bind=True)
+def analyze_recordings(self):
+
+    # indicate that the task is a-runnin'
+    task_id = self.request.id
+    redis_client.hset('task_state', f'{task_id}_status', 'running')
+
+    # set up a handler for SIGTERM signals
+    sigterm_received = [False]
+
+    # Signal handler function
+    def sigterm_handler(signal_number, frame):
+        print(f"SIGTERM received for analyze_recordings, stopping...", flush=True)
+        sigterm_received[0] = True
+
+    signal.signal(signal.SIGTERM, sigterm_handler)
 
     # create the detection dir too
     if not os.path.exists(DETECTION_DIR):
@@ -233,6 +283,24 @@ def analyze_recordings():
 
     # This loop will look for wav files, analyze them, sleep a bit and then do it again
     while True:
+
+        # check for revocation
+        task_status = AsyncResult(task_id).status
+        if task_status == 'REVOKED':
+            print("Analyze_recordings has been revoked", flush=True)
+            break
+
+        # check for sigterm
+        if sigterm_received[0]:
+            print("analyze_recordings got a sigterm", flush=True)
+            break
+
+        # check for signal to stop
+        should_stop = redis_client.hget('task_state', f'{task_id}_stop')
+        if should_stop and should_stop.decode() == 'True':
+            print("analyze_recordings got signal to stop", flush=True)
+            break
+
         # Get all .wav files in the directory
         wav_files = glob.glob(os.path.join(TEMP_DIR, '*.wav'))
 
@@ -309,6 +377,85 @@ def analyze_recordings():
 
         time.sleep(1)
 
+    # we'll only get here if while loop has been break'ed. Indicate that task is stopped
+    redis_client.hset('task_state', f'{task_id}_status', 'stopped')
+
+
+@shared_task(bind=True)
+def monitor_tasks(self, task_ids):
+
+    def all_tasks_stopped():
+        for task_id in task_ids:
+            task_status = redis_client.hget('task_state', f'{task_id}_status').decode()
+            if task_status != 'stopped':
+                return False
+        return True
+
+    def cleanup_task_keys():
+        for task_id in task_ids:
+            redis_client.hdel('task_state', f'{task_id}_status')
+            redis_client.hdel('task_state', f'{task_id}_stop')
+
+    # get task ID for monitor_tasks
+    mt_task_id = self.request.id
+
+    # set up a handler for SIGTERM signals
+    sigterm_received = [False]
+
+    # Signal handler function
+    def sigterm_handler(signal_number, frame):
+        print(f"SIGTERM received for monitor_tasks, stopping...", flush=True)
+        sigterm_received[0] = True
+
+    signal.signal(signal.SIGTERM, sigterm_handler)
+
+    print("Starting monitor_tasks", flush=True)
+
+    try:
+        while True:
+
+            # check for revocation
+            task_status = AsyncResult(mt_task_id).status
+            if task_status == 'REVOKED':
+                print("monitor_tasks has been revoked", flush=True)
+                cleanup_task_keys()
+                break
+
+                # check for sigterm
+            if sigterm_received[0]:
+                print("monitor_tasks got a sigterm", flush=True)
+                cleanup_task_keys()
+                break
+
+            # Periodically check the status of the tasks
+            time.sleep(2)
+
+            # Check to see if we've gotten a restart signal
+            if check_command_value('restart'):
+                # Ask all the tasks to stop
+                for task_id in task_ids:
+                    redis_client.hset('task_state', f'{task_id}_stop', 'True')
+
+                    # Wait for all tasks to stop
+                while not all_tasks_stopped():
+                    print("Waiting for tasks to stop", flush=True)
+                    time.sleep(1)
+
+                print("Tasks stopped. Restarting", flush=True)
+                cleanup_task_keys()
+
+                # Restart the tasks
+                new_task_ids = start_tasks()
+
+                # Update the task_ids variable to monitor the new tasks
+                task_ids = new_task_ids
+
+                # reset the command from the UI
+                reset_command('restart', False)
+
+    except Exception as e:
+        print("Error in monitor_tasks:", e, flush=True)
+
 
 def start_tasks():
     print('Starting recording and analyze tasks', flush=True)
@@ -329,5 +476,5 @@ def process_streams():
     update_birdsoftheweek_table()
 
     task_ids = start_tasks()
-
-
+    # Start the monitor_tasks task
+    monitor_tasks.apply_async(args=[task_ids])
