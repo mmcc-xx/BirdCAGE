@@ -234,7 +234,6 @@ def analyze_recordings():
     # This loop will look for wav files, analyze them, sleep a bit and then do it again
     while True:
         # Get all .wav files in the directory
-
         wav_files = glob.glob(os.path.join(TEMP_DIR, '*.wav'))
 
         # Sort the files by creation time (oldest first)
@@ -311,21 +310,24 @@ def analyze_recordings():
         time.sleep(1)
 
 
+def start_tasks():
+    print('Starting recording and analyze tasks', flush=True)
+    streams = get_streams_list()
+    preferences = get_all_user_preferences(0)
+
+    tasks = [record_stream.s(stream, preferences) for stream in streams]
+    tasks.append(analyze_recordings.s())
+    task_group = group(tasks)
+    results = task_group.apply_async()
+    task_ids = [result.id for result in results.children]
+    return task_ids
+
+
 def process_streams():
     # initialize the table of expected birds
     create_birdsoftheweek_table()
     update_birdsoftheweek_table()
 
-    streams = get_streams_list()
+    task_ids = start_tasks()
 
-    preferences = get_all_user_preferences(0)
 
-    # Iterate through each stream and create a record_stream task
-    tasks = [record_stream.s(stream, preferences) for stream in streams]
-
-    # Add the analyze_recordings task to the list
-    tasks.append(analyze_recordings.s())
-    # tasks = [analyze_recordings.s()]
-
-    # Run the tasks concurrently
-    group(tasks).apply_async()

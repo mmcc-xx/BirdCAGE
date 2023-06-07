@@ -38,6 +38,8 @@ def create_app(init_celery=True):
         # Initialize Celery
         app.config['CELERY_BROKER_URL'] = broker_url
         app.config['CELERY_RESULT_BACKEND'] = result_backend
+        # print("Broker URL: " + app.config['CELERY_BROKER_URL'])
+        # print("Result Backend: " + app.config['CELERY_RESULT_BACKEND'])
         app.celery = make_celery(app)
 
         # start recording and processing streams

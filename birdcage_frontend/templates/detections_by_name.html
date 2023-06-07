@@ -42,7 +42,7 @@
     <script>
         const API_SERVER_URL = "{{ api_server_url }}";
         const formattedDate = "{{ date }}";
-        const commonName = "{{ common_name }}";
+        const commonName = decodeHtmlEntities("{{ common_name }}");
         const endDate = {{ end_date|tojson|default("null", true) }};
 
         function formatTimestamp(timestamp) {
@@ -135,6 +135,12 @@
                 ],
                 "responsive": true
             });
+        }
+
+        function decodeHtmlEntities(text) {
+            const textArea = document.createElement('textarea');
+            textArea.innerHTML = text;
+            return textArea.value;
         }
 
         updateDetectionsByCommonNameTable();
