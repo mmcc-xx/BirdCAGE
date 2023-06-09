@@ -32,14 +32,10 @@ def create_detections_table():
 
 
 def add_detection(timestamp, stream_id, streamname, scientific_name, common_name, confidence, filename):
-    connection = sqlite3.connect(DATABASE_FILE)
-    cursor = connection.cursor()
-
-    cursor.execute('''  
-        INSERT INTO detections (timestamp, stream_id, streamname, scientific_name, common_name, confidence, filename)  
-        VALUES (?, ?, ?, ?, ?, ?, ?)  
-    ''', (timestamp, stream_id, streamname, scientific_name, common_name, confidence, filename))
-
-    connection.commit()
+    with sqlite3.connect(DATABASE_FILE, timeout=20) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''    
+            INSERT INTO detections (timestamp, stream_id, streamname, scientific_name, common_name, confidence, filename)    
+            VALUES (?, ?, ?, ?, ?, ?, ?)    
+        ''', (timestamp, stream_id, streamname, scientific_name, common_name, confidence, filename))
     connection.close()
-

@@ -29,7 +29,7 @@ def create_commands_table():
 
 
 def check_command_value(command_name):
-    connection = sqlite3.connect(DATABASE_FILE)
+    connection = sqlite3.connect(DATABASE_FILE, timeout=20)
     cursor = connection.cursor()
 
     cursor.execute('SELECT value FROM commands WHERE name = ?', (command_name,))

@@ -58,6 +58,14 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
                     .run()
             )
 
+        elif protocol == 'pulse':
+            (
+                ffmpeg
+                    .input(stream_url, f='pulse')
+                    .output(output_filename, format='wav', t=seconds, loglevel='warning')
+                    .run()
+            )
+
         elif protocol == 'youtube':
             youtube_stream_url = get_youtube_stream_url(stream_url, format_code=91)
             if youtube_stream_url is None:
@@ -83,7 +91,6 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
 
 @shared_task(bind=True)
 def record_stream(self, stream, preferences):
-
     # indicate that the task is running
     task_id = self.request.id
     redis_client.hset('task_state', f'{task_id}_status', 'running')
@@ -137,9 +144,10 @@ def record_stream(self, stream, preferences):
 
         if result['status'] == 'success':
             # The recording was successful
-            print(f"Recording successful. File saved to: {result['filepath']}", flush=True)
+            print(f"Recording successful. File saved to: {result['filepath']} Now setting metadata", flush=True)
             set_metadata(os.path.basename(tmp_filename),
                          stream_id, name, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            print(f"Metadata set for: {result['filepath']}", flush=True)
 
         else:
             # The recording failed
@@ -238,12 +246,16 @@ def check_results(results, filepath, recording_metadata, preferences, mqttclient
                 # don't store an mp3 file name if detectionaction is 'log' even if there happens to already be a recording
                 # from this interval
                 if detectionaction == 'log':
+                    print("Adding detection", flush=True)
                     add_detection(timestamp, stream_id, streamname, scientific_name, common_name, confidence_score,
                                   '')
+                    print("Detection added", flush=True)
 
                 else:  # if detection action is record or alert
+                    print("Adding detection", flush=True)
                     add_detection(timestamp, stream_id, streamname, scientific_name, common_name, confidence_score,
                                   mp3_filename)
+                    print("Detection added", flush=True)
 
                 notify(detectionaction, timestamp, stream_id, streamname, scientific_name, common_name,
                        confidence_score, mp3path)
@@ -255,7 +267,6 @@ def check_results(results, filepath, recording_metadata, preferences, mqttclient
 
 @shared_task(bind=True)
 def analyze_recordings(self):
-
     # indicate that the task is a-runnin'
     task_id = self.request.id
     redis_client.hset('task_state', f'{task_id}_status', 'running')
@@ -357,7 +368,9 @@ def analyze_recordings(self):
                     # That file has been analyzed and results stored. Delete it and its metadata record
                     if os.path.exists(file_path):
                         os.remove(file_path)
+                    print("Deleting metadata", flush=True)
                     delete_metadata_by_filename(filename)
+                    print("Metadata deleted", flush=True)
 
                 else:
                     print('FAIL')
@@ -383,7 +396,6 @@ def analyze_recordings(self):
 
 @shared_task(bind=True)
 def monitor_tasks(self, task_ids):
-
     def all_tasks_stopped():
         for task_id in task_ids:
             task_status = redis_client.hget('task_state', f'{task_id}_status').decode()

@@ -1,8 +1,6 @@
 from flask import Blueprint, request, jsonify
 import sqlite3
 from config import DATABASE_FILE
-from ..models.preferences import check_password
-from functools import wraps
 from app.decorators import admin_required
 
 streams_blueprint = Blueprint('streams', __name__)

@@ -2,7 +2,7 @@
 FROM python:3.10
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg pulseaudio
 
 COPY requirements.txt /
 # Install Python packages from requirements.txt

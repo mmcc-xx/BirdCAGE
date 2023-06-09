@@ -18,7 +18,7 @@ def create_recording_metadata_table():
 
 
 def get_metadata_by_filename(filename):
-    connection = sqlite3.connect(DATABASE_FILE)
+    connection = sqlite3.connect(DATABASE_FILE, timeout=20)
     cursor = connection.cursor()
 
     cursor.execute("SELECT * FROM recording_metadata WHERE filename = ?", (filename,))
@@ -40,21 +40,15 @@ def get_metadata_by_filename(filename):
 
 
 def delete_metadata_by_filename(filename):
-    connection = sqlite3.connect(DATABASE_FILE)
-    cursor = connection.cursor()
-
-    cursor.execute("DELETE FROM recording_metadata WHERE filename = ?", (filename,))
-
-    connection.commit()
+    with sqlite3.connect(DATABASE_FILE, timeout=20) as connection:
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM recording_metadata WHERE filename = ?", (filename,))
     connection.close()
 
 
 def set_metadata(filename, stream_id, streamname, timestamp):
-    connection = sqlite3.connect(DATABASE_FILE)
-    cursor = connection.cursor()
-
-    cursor.execute('''INSERT INTO recording_metadata (filename, stream_id, streamname, timestamp)  
-                      VALUES (?, ?, ?, ?)''', (filename, stream_id, streamname, timestamp))
-
-    connection.commit()
+    with sqlite3.connect(DATABASE_FILE, timeout=20) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''INSERT INTO recording_metadata (filename, stream_id, streamname, timestamp)    
+                          VALUES (?, ?, ?, ?)''', (filename, stream_id, streamname, timestamp))
     connection.close()

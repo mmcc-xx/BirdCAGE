@@ -32,7 +32,7 @@ def get_birds_of_the_week():
 
 @filters_blueprint.route('/api/filters/thresholds/<int:user_id>', methods=['GET'])
 def get_thresholds(user_id):
-    connection = sqlite3.connect(DATABASE_FILE)
+    connection = sqlite3.connect(DATABASE_FILE, timeout=20)
     cursor = connection.cursor()
 
     cursor.execute(
@@ -77,7 +77,7 @@ def set_thresholds(user_id):
 
 @filters_blueprint.route('/api/filters/overrides/<int:user_id>', methods=['GET'])
 def get_overrides(user_id):
-    connection = sqlite3.connect(DATABASE_FILE)
+    connection = sqlite3.connect(DATABASE_FILE, timeout=20)
     cursor = connection.cursor()
 
     cursor.execute("SELECT species_name, override_type FROM species_overrides WHERE user_id = ?;", (user_id,))

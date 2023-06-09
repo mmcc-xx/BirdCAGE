@@ -8,6 +8,12 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- Added support for PulseAudio input, meaning you can plug a mic into your soundcard and use that for audio. It wasn't that
+hard to add support for it in the code, but it kind of is a pain to set up. The intersection of Linux and audio inevitably
+involves pain. There's a new environment variable in the docker-compose file, and I'm going to add a wiki page for what else
+you need to do.
+- Added some additional debug output around db calls, and upped some timeouts. At least one user is getting database lock
+problems and I'm trying to get to the bottom of that.
 - I just pushed new back end and front end images that provide a more robust mechanism for restarting tasks, and therefore
 loading preference and stream definition changes. More robust here means "doesn't break everyone's installs"
 - Added installation and usage documentation in the Wiki
@@ -17,7 +23,6 @@ to the length of your recording length setting to restart.
 - Pushed an image for V2.4 of the model for amd64 - arm64 will be done in a couple hours. New model is supposed to be more
 better (see the BirdNET-Analyzer repo for infomation) but it is definitely more slower. So V2.3 is still there under the 
 same image name, the new model is at mmcc73/birdnetserver2.4:latest and mmcc73/birdnetserver2.4_arm64:latest. This has been noted in the docker-compose file
-- Added annual report. Also, BirdNET released a new model - I need to look into what it will take to pick that up.
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide
