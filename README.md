@@ -11,7 +11,7 @@ and proving real time identification of the birds it hears.
 - Added support for PulseAudio input, meaning you can plug a mic into your soundcard and use that for audio. It wasn't that
 hard to add support for it in the code, but it kind of is a pain to set up. The intersection of Linux and audio inevitably
 involves pain. There's a new environment variable in the docker-compose file. Here's how you make it go:
-https://github.com/mmcc-xx/BirdCAGE/wiki/PulseAudio
+https://github.com/mmcc-xx/BirdCAGE/wiki/PulseAudio If there's need for ALSA support please let me know
 - Added some additional debug output around db calls, and upped some timeouts. At least one user is getting database lock
 problems and I'm trying to get to the bottom of that.
 - I just pushed new back end and front end images that provide a more robust mechanism for restarting tasks, and therefore
