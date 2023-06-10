@@ -1,0 +1,84 @@
+{% extends "protected.html" %}
+
+{% block title %}
+App Health
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+    <h2>App Health</h2>
+    <div id="task-health-container" class="row"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const apiServerUrl = "{{ api_server_url }}";
+
+    function fetchTaskHealth() {
+        fetch(`${apiServerUrl}/api/app_health/task_health`)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById("task-health-container");
+            container.innerHTML = ""; // Clear previous content
+
+            data.forEach(task => {
+                const status = task.last_iteration_status;
+                const successCount = task.consecutive_successes;
+                const failCount = task.consecutive_fails;
+                const lastExceptionTime = task.last_exception_timestamp || "N/A";
+                const lastException = task.last_exception;
+
+                const card = `
+                <div class="col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-header">${task.task_name}</div>
+                        <div class="card-body">
+                            <p>Status: <strong>${status}</strong></p>
+                            ${status === "success" ?
+                                `<p>Consecutive Successesful Iterations: ${successCount}</p>` :
+                                `<p>Consecutive Failed Iterations: ${failCount}</p>`
+                            }
+                            <p>Last Exception Time: ${lastExceptionTime}</p>
+                            <p>Last Exception: ${lastException}</p>
+                        </div>
+                    </div>
+                </div>
+                `;
+
+                container.innerHTML += card;
+            });
+
+            return fetch(`${apiServerUrl}/api/app_health/db_health`);
+        })
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById("task-health-container");
+
+            // Create a card for database health information
+            const dbHealthCard = `
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header">Database Health</div>
+                    <div class="card-body">
+                        <p>File Size: ${data.file_size} bytes</p>
+                        <p>Integrity Check: ${data.integrity_check ? "Passed" : "Failed"}</p>
+                        <h5>Table Statistics:</h5>
+                        <ul>
+                            ${data.table_stats.map(table => `<li>${table.table_name}: ${table.row_count} rows</li>`).join("")}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            `;
+
+            container.innerHTML += dbHealthCard;
+        })
+        .catch(error => {
+            console.error("Error fetching health information:", error);
+        });
+    }
+
+    fetchTaskHealth();
+</script>
+{% endblock %}

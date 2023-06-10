@@ -117,47 +117,73 @@ def record_stream(self, stream, preferences):
     transport = stream['transport'] if 'transport' in stream else None
     seconds = preferences['recordinglength']
 
+    # initialize success/fail counters
+    consecutive_successes = 0
+    consecutive_fails = 0
+    redis_client.hset(task_id, 'task_name', 'record_stream_' + name)
+
     while True:
 
-        # check for revocation
-        task_status = AsyncResult(task_id).status
-        if task_status == 'REVOKED':
-            print("record_stream for " + name + " has been revoked", flush=True)
-            break
+        try:
+            # check for revocation
+            task_status = AsyncResult(task_id).status
+            if task_status == 'REVOKED':
+                print("record_stream for " + name + " has been revoked", flush=True)
+                break
 
-        # check for sigterm
-        if sigterm_received[0]:
-            print("record_stream for " + name + " got a sigterm", flush=True)
-            break
+            # check for sigterm
+            if sigterm_received[0]:
+                print("record_stream for " + name + " got a sigterm", flush=True)
+                break
 
-        # check for signal to stop
-        should_stop = redis_client.hget('task_state', f'{task_id}_stop')
-        if should_stop and should_stop.decode() == 'True':
-            print("record_stream for " + name + " got signal to stop", flush=True)
-            break
+            # check for signal to stop
+            should_stop = redis_client.hget('task_state', f'{task_id}_stop')
+            if should_stop and should_stop.decode() == 'True':
+                print("record_stream for " + name + " got signal to stop", flush=True)
+                break
 
-        # Generate a unique temporary filename
-        tmp_filename = TEMP_DIR + f'/{uuid.uuid4().hex}.wav'
+            # Generate a unique temporary filename
+            tmp_filename = TEMP_DIR + f'/{uuid.uuid4().hex}.wav'
 
-        # Record the stream for 15 seconds and save it to the output file
-        result = record_stream_ffmpeg(address, protocol, transport, seconds, tmp_filename)
+            # Record the stream for 15 seconds and save it to the output file
+            result = record_stream_ffmpeg(address, protocol, transport, seconds, tmp_filename)
 
-        if result['status'] == 'success':
-            # The recording was successful
-            print(f"Recording successful. File saved to: {result['filepath']} Now setting metadata", flush=True)
-            set_metadata(os.path.basename(tmp_filename),
-                         stream_id, name, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-            print(f"Metadata set for: {result['filepath']}", flush=True)
+            if result['status'] == 'success':
+                # The recording was successful
+                print(f"Recording successful. File saved to: {result['filepath']} Now setting metadata", flush=True)
+                set_metadata(os.path.basename(tmp_filename),
+                             stream_id, name, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                print(f"Metadata set for: {result['filepath']}", flush=True)
 
-        else:
-            # The recording failed
-            print(f"Recording failed. Error: {result['error']}")
+            else:
+                # The recording failed
+                print(f"Recording failed. Error: {result['error']}")
 
-        # Sleep for some time before recording the stream again
-        time.sleep(1)
+            consecutive_successes += 1
+            consecutive_fails = 0
+
+            redis_client.hset(task_id, 'last_iteration_status', 'success')
+            redis_client.hset(task_id, 'consecutive_successes', consecutive_successes)
+            # Sleep for some time before recording the stream again
+            time.sleep(1)
+
+        except Exception as e:
+            print(f"An exception occurred in record_stream for {name}: {e}")
+            consecutive_successes = 0
+            consecutive_fails += 1
+
+            redis_client.hset(task_id, 'last_iteration_status', 'failed')
+            redis_client.hset(task_id, 'consecutive_fails', consecutive_fails)
+            redis_client.hset(task_id, 'last_exception', str(e))
+            redis_client.hset(task_id, 'last_exception_timestamp', time.time())
+
+            time.sleep(1)
+
 
     # we'll only get here if while loop has been break'ed. Indicate that task is stopped
     redis_client.hset('task_state', f'{task_id}_status', 'stopped')
+    # and delete the task_id has
+    redis_client.delete(task_id)
 
 
 def sendRequest(fpath, mdata):
@@ -292,106 +318,131 @@ def analyze_recordings(self):
     # start the mqtt client
     mqttclient = start_mqtt_client(preferences)
 
+    # initialize success/fail counters
+    consecutive_successes = 0
+    consecutive_fails = 0
+    redis_client.hset(task_id, 'task_name', 'analyze_recordings')
+
     # This loop will look for wav files, analyze them, sleep a bit and then do it again
     while True:
+        try:
+            # check for revocation
+            task_status = AsyncResult(task_id).status
+            if task_status == 'REVOKED':
+                print("Analyze_recordings has been revoked", flush=True)
+                break
 
-        # check for revocation
-        task_status = AsyncResult(task_id).status
-        if task_status == 'REVOKED':
-            print("Analyze_recordings has been revoked", flush=True)
-            break
+            # check for sigterm
+            if sigterm_received[0]:
+                print("analyze_recordings got a sigterm", flush=True)
+                break
 
-        # check for sigterm
-        if sigterm_received[0]:
-            print("analyze_recordings got a sigterm", flush=True)
-            break
+            # check for signal to stop
+            should_stop = redis_client.hget('task_state', f'{task_id}_stop')
+            if should_stop and should_stop.decode() == 'True':
+                print("analyze_recordings got signal to stop", flush=True)
+                break
 
-        # check for signal to stop
-        should_stop = redis_client.hget('task_state', f'{task_id}_stop')
-        if should_stop and should_stop.decode() == 'True':
-            print("analyze_recordings got signal to stop", flush=True)
-            break
+            # Get all .wav files in the directory
+            wav_files = glob.glob(os.path.join(TEMP_DIR, '*.wav'))
 
-        # Get all .wav files in the directory
-        wav_files = glob.glob(os.path.join(TEMP_DIR, '*.wav'))
+            # Sort the files by creation time (oldest first)
+            sorted_wav_files = sorted(wav_files, key=os.path.getctime)
 
-        # Sort the files by creation time (oldest first)
-        sorted_wav_files = sorted(wav_files, key=os.path.getctime)
+            # Iterate through the sorted files
+            for file_path in sorted_wav_files:
+                filename = os.path.basename(file_path)
+                recording_metadata = get_metadata_by_filename(filename)
 
-        # Iterate through the sorted files
-        for file_path in sorted_wav_files:
-            filename = os.path.basename(file_path)
-            recording_metadata = get_metadata_by_filename(filename)
+                if recording_metadata is None:
+                    # Check if the file is older than 5 minutes
+                    file_creation_time = os.path.getctime(file_path)
+                    current_time = time.time()
+                    time_difference_in_seconds = current_time - file_creation_time
+                    time_difference_in_minutes = time_difference_in_seconds / 60
 
-            if recording_metadata is None:
-                # Check if the file is older than 5 minutes
-                file_creation_time = os.path.getctime(file_path)
-                current_time = time.time()
-                time_difference_in_seconds = current_time - file_creation_time
-                time_difference_in_minutes = time_difference_in_seconds / 60
-
-                if time_difference_in_minutes > 5:
-                    # Delete the file
-                    os.remove(file_path)
-                    print(f"There is no metadata and the file is old. Deleted file: {filename}", flush=True)
-
-            else:
-
-                # analyze that recording
-                stream_id = recording_metadata['stream_id']
-                streamname = recording_metadata['streamname']
-                timestamp = recording_metadata['timestamp']
-                filename = recording_metadata['filename']
-
-                # Get the current time
-                now = datetime.now()
-
-                # Get the week number
-                year, week_number, weekday = now.isocalendar()
-
-                mdata = {'lat': preferences['latitude'],
-                         'lon': preferences['longitude'],
-                         'week': week_number,
-                         'overlap': preferences['overlap'],
-                         'sensitivity': preferences['sensitivity'],
-                         'sf_thresh': preferences['sf_thresh'],
-                         'pmode': 'max',
-                         'num_results': 5,
-                         'locale': preferences['locale'],
-                         'save': False}
-
-                analysis = sendRequest(file_path, json.dumps(mdata))
-                if analysis['msg'] == 'success':
-                    # print(analysis, flush=True)
-                    check_results(analysis['results'], file_path, recording_metadata, preferences, mqttclient)
-
-                    # That file has been analyzed and results stored. Delete it and its metadata record
-                    if os.path.exists(file_path):
+                    if time_difference_in_minutes > 5:
+                        # Delete the file
                         os.remove(file_path)
-                    print("Deleting metadata", flush=True)
-                    delete_metadata_by_filename(filename)
-                    print("Metadata deleted", flush=True)
+                        print(f"There is no metadata and the file is old. Deleted file: {filename}", flush=True)
 
                 else:
-                    print('FAIL')
 
-        # Clean up recordings once per day.
-        if (datetime.now() - last_cleanup_time) > timedelta(days=1):
-            recording_retention = float(preferences['recordingretention'])
-            if recording_retention > 0:
-                # Call the recordingcleanup function and update the last_cleanup_time
-                recordingcleanup(recording_retention)
+                    # analyze that recording
+                    stream_id = recording_metadata['stream_id']
+                    streamname = recording_metadata['streamname']
+                    timestamp = recording_metadata['timestamp']
+                    filename = recording_metadata['filename']
 
-            # this is also a good time to update the birds o the week
-            update_birdsoftheweek_table()
+                    # Get the current time
+                    now = datetime.now()
 
-            # get new last_cleanup_time
-            last_cleanup_time = datetime.now()
+                    # Get the week number
+                    year, week_number, weekday = now.isocalendar()
 
-        time.sleep(1)
+                    mdata = {'lat': preferences['latitude'],
+                             'lon': preferences['longitude'],
+                             'week': week_number,
+                             'overlap': preferences['overlap'],
+                             'sensitivity': preferences['sensitivity'],
+                             'sf_thresh': preferences['sf_thresh'],
+                             'pmode': 'max',
+                             'num_results': 5,
+                             'locale': preferences['locale'],
+                             'save': False}
+
+                    analysis = sendRequest(file_path, json.dumps(mdata))
+                    if analysis['msg'] == 'success':
+                        # print(analysis, flush=True)
+                        check_results(analysis['results'], file_path, recording_metadata, preferences, mqttclient)
+
+                        # That file has been analyzed and results stored. Delete it and its metadata record
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                        print("Deleting metadata", flush=True)
+                        delete_metadata_by_filename(filename)
+                        print("Metadata deleted", flush=True)
+
+                    else:
+                        print('FAIL')
+
+            # Clean up recordings once per day.
+            if (datetime.now() - last_cleanup_time) > timedelta(days=1):
+                recording_retention = float(preferences['recordingretention'])
+                if recording_retention > 0:
+                    # Call the recordingcleanup function and update the last_cleanup_time
+                    recordingcleanup(recording_retention)
+
+                # this is also a good time to update the birds o the week
+                update_birdsoftheweek_table()
+
+                # get new last_cleanup_time
+                last_cleanup_time = datetime.now()
+
+            consecutive_successes += 1
+            consecutive_fails = 0
+
+            redis_client.hset(task_id, 'last_iteration_status', 'success')
+            redis_client.hset(task_id, 'consecutive_successes', consecutive_successes)
+            # Sleep for some time before recording the stream again
+            time.sleep(1)
+
+        except Exception as e:
+            print(f"An exception occurred in analyze_recordings: {e}")
+            consecutive_successes = 0
+            consecutive_fails += 1
+
+            redis_client.hset(task_id, 'last_iteration_status', 'failed')
+            redis_client.hset(task_id, 'consecutive_fails', consecutive_fails)
+            redis_client.hset(task_id, 'last_exception', str(e))
+            redis_client.hset(task_id, 'last_exception_timestamp', time.time())
+
+            time.sleep(1)
 
     # we'll only get here if while loop has been break'ed. Indicate that task is stopped
     redis_client.hset('task_state', f'{task_id}_status', 'stopped')
+    # and delete the task_id has
+    redis_client.delete(task_id)
 
 
 @shared_task(bind=True)
@@ -423,8 +474,16 @@ def monitor_tasks(self, task_ids):
 
     print("Starting monitor_tasks", flush=True)
 
-    try:
-        while True:
+    task_id = self.request.id
+    redis_client.set('monitor_task_id', task_id)
+
+    # initialize success/fail counters
+    consecutive_successes = 0
+    consecutive_fails = 0
+    redis_client.hset(task_id, 'task_name', 'monitor_tasks')
+
+    while True:
+        try:
 
             # check for revocation
             task_status = AsyncResult(mt_task_id).status
@@ -465,8 +524,23 @@ def monitor_tasks(self, task_ids):
                 # reset the command from the UI
                 reset_command('restart', False)
 
-    except Exception as e:
-        print("Error in monitor_tasks:", e, flush=True)
+            consecutive_successes += 1
+            consecutive_fails = 0
+
+            redis_client.hset(task_id, 'last_iteration_status', 'success')
+            redis_client.hset(task_id, 'consecutive_successes', consecutive_successes)
+
+        except Exception as e:
+            print(f"An exception occurred in monitor_tasks: {e}")
+            consecutive_successes = 0
+            consecutive_fails += 1
+
+            redis_client.hset(task_id, 'last_iteration_status', 'failed')
+            redis_client.hset(task_id, 'consecutive_fails', consecutive_fails)
+            redis_client.hset(task_id, 'last_exception', str(e))
+            redis_client.hset(task_id, 'last_exception_timestamp', time.time())
+
+            time.sleep(2)
 
 
 def start_tasks():
@@ -479,6 +553,11 @@ def start_tasks():
     task_group = group(tasks)
     results = task_group.apply_async()
     task_ids = [result.id for result in results.children]
+
+    # write the task IDs to redis
+    redis_client.delete('task_ids')
+    for task_id in task_ids:
+        redis_client.sadd('task_ids', task_id)
     return task_ids
 
 

@@ -114,5 +114,10 @@ def annual_report(year):
     return render_template('annual_report.html', year=year, api_server_url=API_SERVER_URL)
 
 
+@app.route('/app_health', methods=['GET'])
+def app_health_task_health():
+    return render_template('app_health.html', api_server_url=API_SERVER_URL)
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(WEBUI_PORT))

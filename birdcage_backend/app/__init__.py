@@ -12,6 +12,7 @@ from app.views.detections import detections_blueprint
 from app.views.filters import filters_blueprint
 from app.views.notifications import notifications_blueprint
 from app.views.commands import commands_blueprint
+from app.views.app_health import app_heath_blueprint
 from app.models.streams import create_streams_table
 from app.models.preferences import create_preferences_table
 from app.models.recording_metadata import create_recording_metadata_table
@@ -62,6 +63,7 @@ def create_app(init_celery=True):
         app.register_blueprint(filters_blueprint)
         app.register_blueprint(notifications_blueprint)
         app.register_blueprint(commands_blueprint)
+        app.register_blueprint(app_heath_blueprint)
 
     return app
 

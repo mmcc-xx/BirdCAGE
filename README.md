@@ -8,6 +8,10 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- Added an App Health report that. I also put try/catch blocks around the main loops in the worker tasks so if there's an 
+exception it should just try again. If you are looking at your detections and things look funny, take a look at that report
+and see if it indicates that exceptions are occurring. This will not tell you if your camera is offline, though it probably
+should.
 - Added support for PulseAudio input, meaning you can plug a mic into your soundcard and use that for audio. It wasn't that
 hard to add support for it in the code, but it kind of is a pain to set up. The intersection of Linux and audio inevitably
 involves pain. There's a new environment variable in the docker-compose file. Here's how you make it go:
@@ -20,9 +24,7 @@ loading preference and stream definition changes. More robust here means "doesn'
 - Made it so you don't have the re-start the app for preferences or stream settings changes. You'll see a new button on both of those
 pages. Behind the scenes it stops and restarts the recording and analysis tasks. If you happen to hit that button just as a recording has begun, it could take up
 to the length of your recording length setting to restart.
-- Pushed an image for V2.4 of the model for amd64 - arm64 will be done in a couple hours. New model is supposed to be more
-better (see the BirdNET-Analyzer repo for infomation) but it is definitely more slower. So V2.3 is still there under the 
-same image name, the new model is at mmcc73/birdnetserver2.4:latest and mmcc73/birdnetserver2.4_arm64:latest. This has been noted in the docker-compose file
+
 
 # BirdCAGE
 BirdCAGE is an application for monitoring the bird songs in audio streams. Security cameras often provide
