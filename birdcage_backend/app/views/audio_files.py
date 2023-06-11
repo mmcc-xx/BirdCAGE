@@ -13,7 +13,8 @@ audio_files_blueprint = Blueprint('audio_files', __name__)
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 DETECTION_DIR = os.path.join(basedir, '..', '..', DETECTION_DIR_NAME)
-
+THUMB_DIR = os.path.join(DETECTION_DIR, 'thumb')
+FULL_DIR = os.path.join(DETECTION_DIR, 'full')
 
 def create_spectrogram(fn_audio, height=50, ratio=2):
     clip, sample_rate = librosa.load(fn_audio, sr=None)
@@ -62,29 +63,45 @@ def serve_audio_file(filename):
 
 @audio_files_blueprint.route('/api/spectrogram/thumb/<path:filename>.png')
 def serve_thumb_spectrogram(filename):
-
     audio_path = os.path.join(DETECTION_DIR, filename)
 
     if not os.path.exists(audio_path):
         abort(404)
 
-    image_binary = create_spectrogram(audio_path, height=70)
-    # Convert byte array to a file-like object
-    image_io = io.BytesIO(image_binary)
+    # Create the thumb directory if it doesn't exist
+    if not os.path.exists(THUMB_DIR):
+        os.makedirs(THUMB_DIR)
 
-    return send_file(image_io, mimetype='image/png')
+    thumb_path = os.path.join(THUMB_DIR, f'{filename}.png')
+
+    # check if the file exists and is bigger than 2KB. create_spectrogram seems to return empty pngs sometime
+    if not os.path.exists(thumb_path) or os.path.getsize(thumb_path) < 2 * 1024:
+        image_binary = create_spectrogram(audio_path, height=70)
+        # Save the thumbnail to the thumb directory
+        with open(thumb_path, 'wb') as thumb_file:
+            thumb_file.write(image_binary)
+
+    return send_file(thumb_path, mimetype='image/png')
 
 
 @audio_files_blueprint.route('/api/spectrogram/<path:filename>.png')
 def serve_spectrogram(filename):
-
     audio_path = os.path.join(DETECTION_DIR, filename)
 
     if not os.path.exists(audio_path):
         abort(404)
 
-    image_binary = create_spectrogram(audio_path, height=800)
-    # Convert byte array to a file-like object
-    image_io = io.BytesIO(image_binary)
+        # Create the FULL_DIR directory if it doesn't exist
+    if not os.path.exists(FULL_DIR):
+        os.makedirs(FULL_DIR)
 
-    return send_file(image_io, mimetype='image/png')
+    full_path = os.path.join(FULL_DIR, f'{filename}.png')
+
+    # check if the file already exists and is bigger than 10KB
+    if not os.path.exists(full_path) or os.path.getsize(full_path) < 10 * 1024:
+        image_binary = create_spectrogram(audio_path, height=800)
+        # Save the full-size spectrogram to the FULL_DIR directory
+        with open(full_path, 'wb') as full_file:
+            full_file.write(image_binary)
+
+    return send_file(full_path, mimetype='image/png')

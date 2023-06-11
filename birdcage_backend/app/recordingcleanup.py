@@ -17,6 +17,8 @@ def recordingcleanup(numdays):
     # Set the value of DETECTION_DIR
     basedir = os.path.dirname(os.path.abspath(__file__))
     DETECTION_DIR = os.path.join(basedir, '..', DETECTION_DIR_NAME)
+    THUMB_DIR = os.path.join(DETECTION_DIR, 'thumb')
+    FULL_DIR = os.path.join(DETECTION_DIR, 'full')
 
     # Connect to the database
     conn = sqlite3.connect(DATABASE_FILE)
@@ -38,6 +40,21 @@ def recordingcleanup(numdays):
                 print(f"Deleted file: {file_path}")
             else:
                 print(f"File not found: {file_path}")
+
+            # delete spectrograms if they exist
+            file_path = os.path.join(THUMB_DIR, filename + ".png")
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"Deleted thumbnail: {file_path}")
+            else:
+                print(f"Thumbnail not found: {file_path}")
+
+            file_path = os.path.join(FULL_DIR, filename + ".png")
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"Deleted spectrogram: {file_path}")
+            else:
+                print(f"Spectrogram not found: {file_path}")
 
                 # Update the record in the database
             cursor.execute("UPDATE detections SET filename = '' WHERE id = ?", (record_id,))

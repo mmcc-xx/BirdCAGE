@@ -428,7 +428,7 @@ def analyze_recordings(self):
             time.sleep(1)
 
         except Exception as e:
-            print(f"An exception occurred in analyze_recordings: {e}")
+            print(f"An exception occurred in analyze_recordings: {e}", flush=True)
             consecutive_successes = 0
             consecutive_fails += 1
 
@@ -439,6 +439,7 @@ def analyze_recordings(self):
 
             time.sleep(1)
 
+    print("Existing analyze_recordings", flush=True)
     # we'll only get here if while loop has been break'ed. Indicate that task is stopped
     redis_client.hset('task_state', f'{task_id}_status', 'stopped')
     # and delete the task_id has
@@ -531,7 +532,7 @@ def monitor_tasks(self, task_ids):
             redis_client.hset(task_id, 'consecutive_successes', consecutive_successes)
 
         except Exception as e:
-            print(f"An exception occurred in monitor_tasks: {e}")
+            print(f"An exception occurred in monitor_tasks: {e}", flush=True)
             consecutive_successes = 0
             consecutive_fails += 1
 
