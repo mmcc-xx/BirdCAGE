@@ -4,15 +4,10 @@ FROM python:3.10
 # Install system dependencies
 RUN apt-get update && apt-get install -y ffmpeg pulseaudio
 
-COPY requirements.txt /
+COPY requirements.txt /tmp
+
 # Install Python packages from requirements.txt
-RUN pip install -r requirements.txt
-
-# Install Gunicorn
-RUN pip install gunicorn
-
-# Install youtube-dl
-RUN pip install "git+https://github.com/ytdl-org/youtube-dl.git"
+RUN pip install -r /tmp/requirements.txt
 
 # Copy files into the container
 COPY run.py start_app.sh config.py celery_worker.py /
