@@ -1,0 +1,15 @@
+apprise==1.4.0
+celery==5.2.7
+redis==4.5.5
+ffmpeg_python==0.2.0
+Flask==2.3.2
+Flask_Cors==3.0.10
+flask_swagger_ui==4.11.1
+librosa==0.10.0.post2
+matplotlib==3.6.3
+numpy==1.24.3
+pydub==0.25.1
+Requests==2.30.0
+bcrypt==4.0.1
+Flask-JWT-Extended==4.4.4
+paho-mqtt==1.6.1
