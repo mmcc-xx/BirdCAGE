@@ -8,6 +8,7 @@ and proving real time identification of the birds it hears.
 
 # Newest stuff
 (listed newest first)
+- Now setting the "retain" flag on MQTT publications. The payload also include the expected occurrence score for the species
 - Now storing spectograms to disk the first time they are generated, and deleting them when the recordings get cleaned up.
 - Added an App Health report that. I also put try/catch blocks around the main loops in the worker tasks so if there's an 
 exception it should just try again. If you are looking at your detections and things look funny, take a look at that report
