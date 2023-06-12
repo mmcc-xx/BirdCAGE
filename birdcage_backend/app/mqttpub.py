@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 import time
 import json
 import base64
+from .filter_functions import get_birdsoftheweek
 
 
 def on_connect(client, userdata, flags, rc):
@@ -57,6 +58,9 @@ def mqttpublish(client, preferences, detectionaction, timestamp, streamname, sci
     includemp3 = preferences['mqttrecordings']
     mqtttopic = "BirdCAGE/" + detectionaction + "/" + streamname
 
+    birdsoftheweek = get_birdsoftheweek()
+    occurrence = birdsoftheweek.get(scientific_name, {}).get('occurrence', 0)
+
     payload = {
         "CommonName": common_name,
         "ScientificName": scientific_name,
@@ -64,6 +68,7 @@ def mqttpublish(client, preferences, detectionaction, timestamp, streamname, sci
         "TimeStamp": timestamp,
         "StreamName": streamname,
         "ImportanceLevel": detectionaction,
+        "Occurrence": occurrence
     }
 
     print("Publishing to " + mqtttopic + " about a " + common_name)
@@ -74,4 +79,4 @@ def mqttpublish(client, preferences, detectionaction, timestamp, streamname, sci
             mp3_data = mp3file.read()
         payload["MP3"] = base64.b64encode(mp3_data).decode('utf-8')
 
-    client.publish(mqtttopic, json.dumps(payload))
+    client.publish(mqtttopic, json.dumps(payload), retain=True)
