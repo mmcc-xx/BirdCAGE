@@ -135,7 +135,7 @@ Weekly Report
                     const tr = document.createElement("tr");
 
                     tr.innerHTML = `
-    <td><a href="/detections/by_common_name/${encodeURIComponent(commonName)}/${formatDate(weekStart)}/${formatDate(weekEnd)}">${commonName}</a></td>
+    <td><a href="{{ url_prefix }}/detections/by_common_name/${encodeURIComponent(commonName)}/${formatDate(weekStart)}/${formatDate(weekEnd)}">${commonName}</a></td>
     <td>${counts.total}</td>
 ${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => {
                         const dailyCount = counts.daily[day];
@@ -143,7 +143,7 @@ ${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => {
                             const barHeight = (dailyCount / maxDailyCount) * 100;
                             return `<td class="day-cell">
                     <div class="bar" style="height: ${barHeight}%"></div>
-                    <a href="/detections/by_common_name/${encodeURIComponent(commonName)}/${data.find(item => item.common_name === commonName && getDayLabel(item.date) === day).date}">${dailyCount}</a>
+                    <a href="{{ url_prefix }}/detections/by_common_name/${encodeURIComponent(commonName)}/${data.find(item => item.common_name === commonName && getDayLabel(item.date) === day).date}">${dailyCount}</a>
                 </td>`;
                         } else {
                             return '<td class="day-cell"></td>';

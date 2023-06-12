@@ -61,6 +61,8 @@ services:
       WEBUI_PORT: 7008
       #TITLE_TEXT: Your Title Here
       #TITLE_LINK: http://yourlinkhere
+      #TITLE_TEXT: Your Title Here
+      #URL_PREFIX: /birdcage
       #Include the above variables if you want to put some text, and optionally a link, in the nav bar
     volumes:
       - "/etc/localtime:/etc/localtime:ro"

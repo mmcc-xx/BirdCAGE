@@ -78,12 +78,14 @@ Annual Report
             <tr class="sticky-header" id="table-header">
                 <th>Common Name</th>
                 <th>Total Detections</th>
-{% set month_abbreviations = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
-{% for month in range(1, 13) %}
-    <th>
-        <a href="/monthly_report/{{ year }}-{{ '%02d'|format(month) }}">{{ month_abbreviations[month - 1] }}</a>
-    </th>
-{% endfor %}
+                {% set month_abbreviations = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
+                'Nov', 'Dec'] %}
+                {% for month in range(1, 13) %}
+                <th>
+                    <a href="{{ url_prefix }}/monthly_report/{{ year }}-{{ '%02d'|format(month) }}">{{
+                        month_abbreviations[month - 1] }}</a>
+                </th>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
@@ -99,8 +101,8 @@ Annual Report
     const reportTable = document.getElementById("report-table");
     const apiServerUrl = "{{ api_server_url }}";
 
-function updateReport() {
-            const year = yearPicker.value;
+    function updateReport() {
+        const year = yearPicker.value;
         reportTitle.textContent = `Detection Report for ${year}`;
 
     fetch(`${apiServerUrl}/api/detections/annual-report/${year}`)
