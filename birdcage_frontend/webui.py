@@ -4,36 +4,37 @@ from datetime import datetime, date
 import os
 from calendar import monthrange
 
+API_SERVER_URL = os.environ.get('API_SERVER_URL')
+SCRIPT_NAME = os.environ.get('SCRIPT_NAME')
+TITLE_TEXT = os.environ.get('TITLE_TEXT')
+TITLE_LINK = os.environ.get('TITLE_LINK')
+WEBUI_PORT = os.environ.get('WEBUI_PORT')
+
 app = Flask(__name__)
-
-API_SERVER_URL = os.environ.get('API_SERVER_URL', 'http://192.168.1.75:7006')
-WEBUI_PORT = os.environ.get('WEBUI_PORT', '7009')
-TITLE_TEXT = os.environ.get('TITLE_TEXT', '')
-TITLE_LINK = os.environ.get('TITLE_LINK', '')
-URL_PREFIX = os.environ.get('URL_PREFIX', '')
-
 
 @app.route('/')
 def index():
     today = datetime.now().strftime('%Y-%m-%d')
-    return render_template('index.html', api_server_url=API_SERVER_URL, today=today, title_text=TITLE_TEXT,
-                           title_link=TITLE_LINK, url_prefix=URL_PREFIX)
+    return render_template('index.html', api_server_url=API_SERVER_URL, script_name=SCRIPT_NAME, 
+                           title_link=TITLE_LINK, title_text=TITLE_TEXT, today=today)
 
 
 @app.route('/detections/by_hour/<date>/<int:hour>')
 def show_detections_by_hour(date, hour):
-    return render_template('detections_by_hour.html', date=date, api_server_url=API_SERVER_URL, hour=hour)
+    return render_template('detections_by_hour.html', api_server_url=API_SERVER_URL, date=date, 
+                           hour=hour, script_name=SCRIPT_NAME)
 
 
 @app.route('/detections/by_common_name/<common_name>/<date>', defaults={'end_date': None})
 @app.route('/detections/by_common_name/<common_name>/<date>/<end_date>')
 def show_detections_by_common_name(common_name, date, end_date):
-    return render_template('detections_by_name.html', api_server_url=API_SERVER_URL, common_name=common_name, date=date, end_date=end_date)
+    return render_template('detections_by_name.html', api_server_url=API_SERVER_URL, common_name=common_name, 
+                           date=date, end_date=end_date, script_name=SCRIPT_NAME)
 
 
 @app.route('/daily_summary/<date>')
 def daily_summary(date):
-    return render_template('daily_summary.html', date=date, api_server_url=API_SERVER_URL)
+    return render_template('daily_summary.html', api_server_url=API_SERVER_URL, date=date)
 
 
 @app.route('/stream_settings', methods=['GET'])
@@ -51,7 +52,7 @@ def preferences():
 
 @app.route('/detections/detection/<int:detection_id>')
 def show_detection_details(detection_id):
-    return render_template('detection_details.html', detection_id=detection_id, api_server_url=API_SERVER_URL)
+    return render_template('detection_details.html', api_server_url=API_SERVER_URL, detection_id=detection_id)
 
 
 @app.route('/birdsoftheweek')
@@ -85,7 +86,7 @@ def weekly_report(week):
         # Redirect to the URL with the current week
         return redirect(url_for('weekly_report', week=week))
 
-    return render_template('weekly_report.html', week=week, api_server_url=API_SERVER_URL, url_prefix=URL_PREFIX)
+    return render_template('weekly_report.html', api_server_url=API_SERVER_URL, script_name=SCRIPT_NAME, week=week)
 
 
 @app.route('/monthly_report/', defaults={'month': None})
@@ -100,7 +101,7 @@ def monthly_report(month):
         # Redirect to the URL with the current month
         return redirect(url_for('monthly_report', month=month))
 
-    return render_template('monthly_report.html', month=month, api_server_url=API_SERVER_URL, url_prefix=URL_PREFIX)
+    return render_template('monthly_report.html', api_server_url=API_SERVER_URL, month=month, script_name=SCRIPT_NAME)
 
 
 @app.route('/annual_report/', defaults={'year': None})
@@ -112,7 +113,7 @@ def annual_report(year):
         # Redirect to the URL with the current year
         return redirect(url_for('annual_report', year=year))
 
-    return render_template('annual_report.html', year=year, api_server_url=API_SERVER_URL, url_prefix=URL_PREFIX)
+    return render_template('annual_report.html', api_server_url=API_SERVER_URL, script_name=SCRIPT_NAME, year=year)
 
 
 @app.route('/app_health', methods=['GET'])

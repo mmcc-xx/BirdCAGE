@@ -23,7 +23,7 @@ def get_earliest_detection_date():
         return jsonify({"error": "No data available"})
 
 
-    # Get X most recent detections
+# Get X most recent detections
 @detections_blueprint.route('/api/detections/recent/<int:limit>', methods=['GET'])
 def get_recent_detections(limit):
     connection = sqlite3.connect(DATABASE_FILE)
@@ -133,7 +133,7 @@ def get_detections_with_highest_confidence(date):
     return jsonify(detections)
 
 
-# all detections for a date range
+# All detections for a date range
 @detections_blueprint.route('/api/detections/date_range/<string:start_date>/<string:end_date>', methods=['GET'])
 def get_detections_by_date_range(start_date, end_date):
     connection = sqlite3.connect(DATABASE_FILE)
@@ -148,7 +148,7 @@ def get_detections_by_date_range(start_date, end_date):
     return jsonify(detections)
 
 
-# number of detections for a date range
+# Number of detections for a date range
 @detections_blueprint.route('/api/detections/date_range/<string:start_date>/<string:end_date>/count', methods=['GET'])
 def get_detection_count_by_date_range(start_date, end_date):
     connection = sqlite3.connect(DATABASE_FILE)
@@ -162,7 +162,7 @@ def get_detection_count_by_date_range(start_date, end_date):
     return jsonify({"count": count})
 
 
-# number of detections for a given date range for unique scientific_names, descending or ascending:
+# Number of detections for a given date range for unique scientific_names, descending or ascending:
 @detections_blueprint.route(
     '/api/detections/date_range/<string:start_date>/<string:end_date>/grouped/<string:sort_order>', methods=['GET'])
 def get_grouped_detections_by_date_range(start_date, end_date, sort_order):

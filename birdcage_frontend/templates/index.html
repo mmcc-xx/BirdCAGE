@@ -61,7 +61,7 @@
         // Add the event listener for date picker
         document.getElementById("date-picker").addEventListener("change", function (event) {
             const selectedDate = event.target.value;
-            window.location.href = `/daily_summary/${selectedDate}`;
+            window.location.href = `{{ script_name }}/daily_summary/${selectedDate}`;
         });
 
         function setDatePickerMinMaxDate() {
@@ -154,7 +154,7 @@
 
                         // Add event listener to navigate to detection details page
                         row.addEventListener('click', () => {
-                            window.location.href = `/detections/detection/${detection[0]}`;
+			                 window.location.href = `{{ script_name }}/detections/detection/${detection[0]}`;
                         });
 
                         tableBody.appendChild(row);
@@ -188,7 +188,7 @@
                 if (hour <= currHour) { // Only create columns for past and current hours
                     const th = document.createElement('th');
                     const link = document.createElement('a');
-                    link.href = `/detections/by_hour/${today}/${hour}`;
+                    link.href = `{{ script_name }}/detections/by_hour/${today}/${hour}`;
                     link.textContent = hour;
                     link.classList.add('btn', 'btn-secondary', 'btn-sm');
                     th.appendChild(link);
@@ -240,7 +240,7 @@
                 // Add common_name cell
                 const commonNameCell = document.createElement('td');
                 const commonNameLink = document.createElement('a');
-                commonNameLink.href = `/detections/by_common_name/${encodeURIComponent(rowData.common_name)}/${today}`;
+                commonNameLink.href = `{{ script_name }}/detections/by_common_name/${encodeURIComponent(rowData.common_name)}/${today}`;
                 commonNameLink.textContent = rowData.common_name;
                 commonNameLink.classList.add('link-dark');
                 commonNameCell.appendChild(commonNameLink);

@@ -82,7 +82,7 @@ Annual Report
                 'Nov', 'Dec'] %}
                 {% for month in range(1, 13) %}
                 <th>
-                    <a href="{{ url_prefix }}/monthly_report/{{ year }}-{{ '%02d'|format(month) }}">{{
+                    <a href="{{ script_name }}/monthly_report/{{ year }}-{{ '%02d'|format(month) }}">{{
                         month_abbreviations[month - 1] }}</a>
                 </th>
                 {% endfor %}
@@ -161,7 +161,7 @@ Annual Report
                         //console.log(`Common Name: ${commonName}, Month: ${paddedMonth}, Day: ${day + 1}, Bar Height: ${barHeight}%`);
                         return `<div class="bar" style="height: ${barHeight}%"></div>`;
                     }).join('');
-                    const totalCountDiv = monthData.total !== undefined ? `<div class="bar-total"><a href="/detections/by_common_name/${encodeURIComponent(commonName)}/${year}-${paddedMonth}-01/${year}-${paddedMonth}-${new Date(year, month, 0).getDate()}">${monthData.total}</a></div>` : '';
+                    const totalCountDiv = monthData.total !== undefined ? `<div class="bar-total"><a href="{{ script_name }}/detections/by_common_name/${encodeURIComponent(commonName)}/${year}-${paddedMonth}-01/${year}-${paddedMonth}-${new Date(year, month, 0).getDate()}">${monthData.total}</a></div>` : '';
                     monthlyColumns.push(`<td class="bar-cell"><div class="bar-wrapper">${dailyBars}${totalCountDiv}</div></td>`);
                 }
 

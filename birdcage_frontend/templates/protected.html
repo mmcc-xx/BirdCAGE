@@ -4,6 +4,7 @@
 <script>
     function isAuthenticated() {
         const token = localStorage.getItem("jwt_token");
+
         if (!token) {
             return false;
         }
@@ -23,7 +24,7 @@
 
     if (!isAuthenticated()) {
         localStorage.setItem("attempted_url", window.location.href);
-        window.location.href = "/login";
+        window.location.href = "{{ url_for('login') }}";
     }
 </script>
 {% endblock %}

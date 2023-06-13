@@ -142,7 +142,7 @@ Monthly Report
                             dailyColumns.push(`
                                 <td class="day-cell">
                                     <div class="bar" style="height: ${barHeight}%"></div>
-                                    <a href="{{ url_prefix }}/detections/by_common_name/${encodeURIComponent(commonName)}/${year}-${paddedMonth}-${paddedDay}">${dailyCount}</a>
+                                    <a href="{{ script_name }}/detections/by_common_name/${encodeURIComponent(commonName)}/${year}-${paddedMonth}-${paddedDay}">${dailyCount}</a>
                                 </td>`);
                         } else {
                             dailyColumns.push('<td class="day-cell"></td>');
@@ -150,7 +150,7 @@ Monthly Report
                     }
 
                     tr.innerHTML = `
-                        <td><a href="{{ url_prefix }}/detections/by_common_name/${encodeURIComponent(commonName)}/${monthStart}/${monthEnd}">${commonName}</a></td>
+                        <td><a href="{{ script_name }}/detections/by_common_name/${encodeURIComponent(commonName)}/${monthStart}/${monthEnd}">${commonName}</a></td>
                         <td>${counts.total}</td>
                         ${dailyColumns.join("")}
                     `;
