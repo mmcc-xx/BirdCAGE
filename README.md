@@ -10,7 +10,7 @@ and proving real time identification of the birds it hears.
 (listed newest first)
 - Now setting the "retain" flag on MQTT publications. The payload also include the expected occurrence score for the species
 - Now storing spectograms to disk the first time they are generated, and deleting them when the recordings get cleaned up.
-- Added an App Health report that. I also put try/catch blocks around the main loops in the worker tasks so if there's an 
+- Added an App Health report that. I also put try/catch blocks around the main loops in the worker tasks so if there's an
 exception it should just try again. If you are looking at your detections and things look funny, take a look at that report
 and see if it indicates that exceptions are occurring. This will not tell you if your camera is offline, though it probably
 should.
@@ -29,7 +29,7 @@ BirdCAGE is an application for monitoring the bird songs in audio streams. Secur
 rtsp and rtmp streams that contain both video and audio. Feed the audio into BirdCAGE and see what sorts of birds are hanging around.
 
 BirdCAGE was strongly inspired by BirdNET-Pi, but with the constraints of running in a Rasberry Pi removed. It utilizes
-a slightly patched version of the analysis server provided by the BirdNET-Analyzer project. 
+a slightly patched version of the analysis server provided by the BirdNET-Analyzer project.
 
 BirdCAGE is written in Python and was designed to be containerizable. It utilizes a separate back end and front end application.
 The back end application records streams, calls the analysis server, stores results, and serves as an API server for the front end
@@ -40,7 +40,7 @@ This is early days. Chances are things will break. Let me know what's broke in t
 letter or whatever.
 
 ## To Do
-- I'm planning to work on a "sattelite recorder" based on the ESP32 platform. It'll probably need a different interface to upload audio
+- I'm planning to work on a "satelite recorder" based on the ESP32 platform. It'll probably need a different interface to upload audio
 to avoid interference between the audio and WiFi.
 - Somehow integrate with the video based bird identification app [WhosAtMyFeeder](https://github.com/mmcc-xx/WhosAtMyFeeder)
 - User requested enhancements - request away!
