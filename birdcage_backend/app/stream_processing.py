@@ -54,7 +54,8 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
             (
                 ffmpeg
                     .input(stream_url, rtsp_transport=transport.lower())
-                    .output(output_filename, format='wav', t=seconds, loglevel='warning')
+                    .output(output_filename, format='wav', t=seconds, loglevel='warning',
+                            ac=1, ar=48000, sample_fmt='s16')
                     .run()
             )
 
@@ -62,7 +63,8 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
             (
                 ffmpeg
                     .input(stream_url, f='pulse')
-                    .output(output_filename, format='wav', t=seconds, loglevel='warning')
+                    .output(output_filename, format='wav', t=seconds, loglevel='warning',
+                            ac=1, ar=48000, sample_fmt='s16')
                     .run()
             )
 
@@ -73,14 +75,16 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
             (
                 ffmpeg
                     .input(youtube_stream_url)
-                    .output(output_filename, format='wav', t=seconds, loglevel='warning')
+                    .output(output_filename, format='wav', t=seconds, loglevel='warning',
+                            ac=1, ar=48000, sample_fmt='s16')
                     .run()
             )
         else:
             (
                 ffmpeg
                     .input(stream_url)
-                    .output(output_filename, format='wav', t=seconds, loglevel='warning')
+                    .output(output_filename, format='wav', t=seconds, loglevel='warning',
+                            ac=1, ar=48000, sample_fmt='s16')
                     .run()
             )
         return {'status': 'success', 'filepath': output_filename}
