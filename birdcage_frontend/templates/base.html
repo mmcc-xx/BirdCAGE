@@ -13,52 +13,56 @@
 </head>
 <body>
 
-<!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">BirdCAGE</a>
-        {% if title_text %}
-        <span class="navbar-text">
-            {% if title_link %}
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">BirdCAGE</a>
+            {% if title_text %}
+            <span class="navbar-text">
+                {% if title_link %}
                 <a class="navbar-title" href="{{ title_link }}">{{ title_text }}</a>
-            {% else %}
+                {% else %}
                 <span class="navbar-title">{{ title_text }}</span>
+                {% endif %}
+            </span>
             {% endif %}
-        </span>
-        {% endif %}
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Reports
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
-                        <li><a class="dropdown-item" href="/weekly_report">Weekly</a></li>
-                        <li><a class="dropdown-item" href="/monthly_report">Monthly</a></li>
-                        <li><a class="dropdown-item" href="/annual_report">Annual</a></li>
-                        <li><a class="dropdown-item" href="/app_health">App Health</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Settings
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
-                        <li><a class="dropdown-item" href="/detectionfilters">Detection Filters</a></li>
-                        <li><a class="dropdown-item" href="/stream_settings">Stream Settings</a></li>
-                        <li><a class="dropdown-item" href="/notification_settings">Notification Settings</a></li>
-                        <li><a class="dropdown-item" href="/preferences">Preferences</a></li>
-                    </ul>
-                </li>
-            </ul>
-            {% block date_picker %}{% endblock %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Reports
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('weekly_report') }}">Weekly</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('monthly_report') }}">Monthly</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('annual_report') }}">Annual</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('app_health_task_health') }}">App Health</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Settings
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('detection_filters') }}">Detection Filters</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('streams') }}">Stream Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('notification_settings') }}">Notification Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('preferences') }}">Preferences</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                {% block date_picker %}{% endblock %}
+            </div>
         </div>
-    </div>
-</nav>
-<!-- End of Navigation -->
+    </nav>
+    <!-- End of Navigation -->
 
 
     <div class="container-fluid">

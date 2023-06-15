@@ -11,7 +11,7 @@ def get_db_connection():
 
 
 # Get all of the notification services and URLs from notification_services
-@notifications_blueprint.route('/services', methods=['GET'])
+@notifications_blueprint.route('/api/services', methods=['GET'])
 def get_notification_services():
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -24,7 +24,7 @@ def get_notification_services():
 
 
 # Set the URL for a notification service from notification_services
-@notifications_blueprint.route('/services/<service_name>', methods=['PUT'])
+@notifications_blueprint.route('/api/services/<service_name>', methods=['PUT'])
 @admin_required
 def set_notification_service_url(service_name):
     service_url = request.json.get('service_url', '')
@@ -39,7 +39,7 @@ def set_notification_service_url(service_name):
 
 
 # Get all of the detection actions and associated notification services from notification_assignments
-@notifications_blueprint.route('/assignments', methods=['GET'])
+@notifications_blueprint.route('/api/assignments', methods=['GET'])
 def get_detection_assignments():
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -53,7 +53,7 @@ def get_detection_assignments():
 
 
 # Add a specified notification service for a particular detection action in notification_assignments
-@notifications_blueprint.route('/assignments', methods=['POST'])
+@notifications_blueprint.route('/api/assignments', methods=['POST'])
 @admin_required
 def add_detection_assignment():
     detection_action = request.json.get('detection_action')
@@ -74,7 +74,7 @@ def add_detection_assignment():
 
 
 # Remove a specified notification service for a particular detection action in notification_assignments
-@notifications_blueprint.route('/assignments', methods=['DELETE'])
+@notifications_blueprint.route('/api/assignments', methods=['DELETE'])
 @admin_required
 def remove_detection_assignment():
     detection_action = request.json.get('detection_action')

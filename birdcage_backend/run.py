@@ -16,11 +16,11 @@ swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
     config={
-        'app_name': "My API"
+        'app_name': 'BirdCAGE'
     }
 )
-app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 # Redirect the root URL to Swagger UI
 @app.route('/')

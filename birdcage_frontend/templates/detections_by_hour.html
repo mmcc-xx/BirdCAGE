@@ -93,7 +93,7 @@
 
                         // Add event listener to navigate to detection details page
                         row.addEventListener('click', () => {
-                            window.location.href = `/detections/detection/${detection.id}`;
+                            window.location.href = `{{ script_name }}/detections/detection/${detection.id}`;
                         });
 
                         tableBody.appendChild(row);

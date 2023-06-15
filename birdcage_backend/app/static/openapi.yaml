@@ -187,7 +187,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
 
-  /audio-files/{filename}:
+  /api/audio-files/{filename}:
     get:
       summary: Retrieve an audio file
       description: This endpoint serves the audio files stored on the server.

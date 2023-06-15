@@ -1,12 +1,10 @@
 # Use the official Python 3.10 image as the base image
 FROM python:3.10
 
-COPY requirements.txt /
-# Install Python packages from requirements.txt
-RUN pip install -r requirements.txt
+COPY requirements.txt /tmp
 
-# Install Gunicorn
-RUN pip install gunicorn
+# Install Python packages from requirements.txt
+RUN pip install -r /tmp/requirements.txt
 
 COPY start_app.sh /
 COPY webui.py /
