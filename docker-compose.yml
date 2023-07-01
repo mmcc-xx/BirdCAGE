@@ -6,8 +6,8 @@ services:
   # with an image they maintain in the future
   birdnetserver:
     restart: unless-stopped
-    build: ./BirdNet-Analyzer
-    #image: mmcc73/birdnetserver:latest # If you are running on an arm64 machine, like a Pi 4, 
+    #build: ./BirdNet-Analyzer
+    image: mmcc73/birdnetserver_arm64:latest # If you are running on an arm64 machine, like a Pi 4, 
                                        # use mmcc73/birdnetserver_arm64:latest as the image name
                                        # This will get you 2.3 of the BirdNET model If you want V2.4, use
                                        # mmcc73/birdnetserver2.4:latest or mmcc73/birdnetserver2.4_arm64:latest
