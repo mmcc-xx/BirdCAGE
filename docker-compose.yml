@@ -6,7 +6,8 @@ services:
   # with an image they maintain in the future
   birdnetserver:
     restart: unless-stopped
-    image: mmcc73/birdnetserver:latest # If you are running on an arm64 machine, like a Pi 4, 
+    build: ./BirdNet-Analyzer
+    #image: mmcc73/birdnetserver:latest # If you are running on an arm64 machine, like a Pi 4, 
                                        # use mmcc73/birdnetserver_arm64:latest as the image name
                                        # This will get you 2.3 of the BirdNET model If you want V2.4, use
                                        # mmcc73/birdnetserver2.4:latest or mmcc73/birdnetserver2.4_arm64:latest
@@ -20,7 +21,8 @@ services:
       - birdcage_net
 
   birdcage_backend:
-    image: "mmcc73/birdcage_backend:latest"
+    #image: "mmcc73/birdcage_backend:latest"
+    build: ./birdcage_backend
     ports:
       - "7007:7007"
     environment:
@@ -57,7 +59,8 @@ services:
       - birdcage_net
 
   birdcage_frontend:
-    image: "mmcc73/birdcage_frontend:latest"
+    #image: "mmcc73/birdcage_frontend:latest"
+    build: ./birdcage_frontend
     ports:
       - "7008:7008"
     environment:
