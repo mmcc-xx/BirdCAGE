@@ -1,0 +1,43 @@
+---
+name: Birdcage
+version: dev
+slug: "birdcage"
+description: A docker-compse based bird recording service
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+#ports:
+#  7007/tcp: 7007
+#  7008/tcp: 7008
+#  7667/tcp: 8085
+docker_api: true
+docker_api_restrict_networks: false
+docker_api_privileged: true
+protection: false
+url: "https://github.com/mmcc-xx/BirdCAGE"
+webui: "http://[HOST]:[PORT:7008]"
+#ingress:
+#  entry: "birdcage"
+#  target: 7008
+docker_container:
+  - birdcage_backend
+  - birdcage_frontend
+  - birdnetserver
+  - redis
+map:
+  - share:rw
+hassio_api: true
+startup: application
+boot: manual
+options:
+  log_level: info
+  seconds_between_quotes: 5
+schema:
+  log_level: list(trace|debug|info|notice|warning|error|fatal)
+  seconds_between_quotes: int(1,120)
+#add a minute delay over the docker kill command - docker-compose down can take a while to run
+timeout: 60
