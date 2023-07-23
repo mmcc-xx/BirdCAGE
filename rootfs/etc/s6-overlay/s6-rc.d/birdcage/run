@@ -1,0 +1,14 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Community Add-on: Birdcage
+# Runs example1 script
+# ==============================================================================
+
+bashio::log.info "Running the run script"
+
+# Set the S6_KILL_FINISH_MAXTIME environment variable
+export S6_KILL_FINISH_MAXTIME=60000
+
+# Run the birdcagerun.sh script located in /usr/bin
+exec /usr/bin/birdcagerun.sh
