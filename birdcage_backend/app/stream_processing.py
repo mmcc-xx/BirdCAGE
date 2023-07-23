@@ -56,7 +56,7 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
                     .input(stream_url, rtsp_transport=transport.lower())
                     .output(output_filename, format='wav', t=seconds, loglevel='warning',
                             ac=1, ar=48000, sample_fmt='s16')
-                    .run()
+                    .run(capture_stdout=True, capture_stderr=True)
             )
 
         elif protocol == 'pulse':
@@ -65,7 +65,7 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
                     .input(stream_url, f='pulse')
                     .output(output_filename, format='wav', t=seconds, loglevel='warning',
                             ac=1, ar=48000, sample_fmt='s16')
-                    .run()
+                    .run(capture_stdout=True, capture_stderr=True)
             )
 
         elif protocol == 'youtube':
@@ -77,7 +77,7 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
                     .input(youtube_stream_url)
                     .output(output_filename, format='wav', t=seconds, loglevel='warning',
                             ac=1, ar=48000, sample_fmt='s16')
-                    .run()
+                    .run(capture_stdout=True, capture_stderr=True)
             )
         else:
             (
@@ -85,11 +85,16 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
                     .input(stream_url)
                     .output(output_filename, format='wav', t=seconds, loglevel='warning',
                             ac=1, ar=48000, sample_fmt='s16')
-                    .run()
+                    .run(capture_stdout=True, capture_stderr=True)
             )
         return {'status': 'success', 'filepath': output_filename}
     except ffmpeg.Error as e:
-        print(f'Error: {e}')
+        message = f'Error: {e}'
+        if e.stdout:
+            message += f'\n stdout: {e.stdout.decode("ASCII")}'
+        if e.stderr:
+            message += f'\n stderr: {e.stderr.decode("ASCII")}'
+        print(message)
         return {'status': 'failure', 'error': str(e)}
 
 
