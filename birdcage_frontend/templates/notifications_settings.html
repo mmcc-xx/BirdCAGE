@@ -64,7 +64,7 @@ const API_SERVER_URL = '{{ api_server_url }}';
 const jwt_token = localStorage.getItem("jwt_token");
 
 function getNotificationServices() {
-  return fetch(`${API_SERVER_URL}/services`, {
+  return fetch(`${API_SERVER_URL}/api/services`, {
     headers: {
       'Authorization': `Bearer ${jwt_token}`
     }
@@ -72,7 +72,7 @@ function getNotificationServices() {
 }
 
 function setServiceUrl(serviceName, serviceUrl) {
-  return fetch(`${API_SERVER_URL}/services/${serviceName}`, {
+  return fetch(`${API_SERVER_URL}/api/services/${serviceName}`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${jwt_token}`,
@@ -83,7 +83,7 @@ function setServiceUrl(serviceName, serviceUrl) {
 }
 
 function getAssignments() {
-  return fetch(`${API_SERVER_URL}/assignments`, {
+  return fetch(`${API_SERVER_URL}/api/assignments`, {
     headers: {
       'Authorization': `Bearer ${jwt_token}`
     }
@@ -91,7 +91,7 @@ function getAssignments() {
 }
 
 function addAssignment(detection_action, notification_service) {
-  return fetch(`${API_SERVER_URL}/assignments`, {
+  return fetch(`${API_SERVER_URL}/api/assignments`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${jwt_token}`,
@@ -102,7 +102,7 @@ function addAssignment(detection_action, notification_service) {
 }
 
 function removeAssignment(detection_action, notification_service) {
-  return fetch(`${API_SERVER_URL}/assignments`, {
+  return fetch(`${API_SERVER_URL}/api/assignments`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${jwt_token}`,

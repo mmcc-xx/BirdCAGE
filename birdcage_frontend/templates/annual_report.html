@@ -78,12 +78,14 @@ Annual Report
             <tr class="sticky-header" id="table-header">
                 <th>Common Name</th>
                 <th>Total Detections</th>
-{% set month_abbreviations = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
-{% for month in range(1, 13) %}
-    <th>
-        <a href="/monthly_report/{{ year }}-{{ '%02d'|format(month) }}">{{ month_abbreviations[month - 1] }}</a>
-    </th>
-{% endfor %}
+                {% set month_abbreviations = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
+                'Nov', 'Dec'] %}
+                {% for month in range(1, 13) %}
+                <th>
+                    <a href="{{ script_name }}/monthly_report/{{ year }}-{{ '%02d'|format(month) }}">{{
+                        month_abbreviations[month - 1] }}</a>
+                </th>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
@@ -99,8 +101,8 @@ Annual Report
     const reportTable = document.getElementById("report-table");
     const apiServerUrl = "{{ api_server_url }}";
 
-function updateReport() {
-            const year = yearPicker.value;
+    function updateReport() {
+        const year = yearPicker.value;
         reportTitle.textContent = `Detection Report for ${year}`;
 
     fetch(`${apiServerUrl}/api/detections/annual-report/${year}`)
@@ -159,7 +161,7 @@ function updateReport() {
                         //console.log(`Common Name: ${commonName}, Month: ${paddedMonth}, Day: ${day + 1}, Bar Height: ${barHeight}%`);
                         return `<div class="bar" style="height: ${barHeight}%"></div>`;
                     }).join('');
-                    const totalCountDiv = monthData.total !== undefined ? `<div class="bar-total"><a href="/detections/by_common_name/${encodeURIComponent(commonName)}/${year}-${paddedMonth}-01/${year}-${paddedMonth}-${new Date(year, month, 0).getDate()}">${monthData.total}</a></div>` : '';
+                    const totalCountDiv = monthData.total !== undefined ? `<div class="bar-total"><a href="{{ script_name }}/detections/by_common_name/${encodeURIComponent(commonName)}/${year}-${paddedMonth}-01/${year}-${paddedMonth}-${new Date(year, month, 0).getDate()}">${monthData.total}</a></div>` : '';
                     monthlyColumns.push(`<td class="bar-cell"><div class="bar-wrapper">${dailyBars}${totalCountDiv}</div></td>`);
                 }
 

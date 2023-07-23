@@ -16,7 +16,7 @@ Detection Filters
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/birdsoftheweek">Birds of the Week</a>
+                        <a class="nav-link" href="{{ url_for('birds_of_the_week') }}">Birds of the Week</a>
                     </li>
                 </ul>
             </div>
@@ -24,7 +24,8 @@ Detection Filters
     </nav>
 
     <h2>Detection Filters</h2>
-    <p class="text-muted">Visit <a href="/birdsoftheweek">Birds of the Week</a> to see expected species and occurrence values for this week.</p>
+    <p class="text-muted">Visit <a href="{{ url_for('birds_of_the_week') }}">Birds of the Week</a> to see expected species
+        and occurrence values for this week.</p>
 
     <form id="thresholds-form">
         <div class="row">
@@ -60,7 +61,8 @@ Detection Filters
                 <label for="species-name" class="form-label">Species Name</label>
                 <input type="text" class="form-control" id="species-name" name="species_name" required>
                 <!-- Add note under Species Name -->
-                <small class="form-text text-muted">Please use the species' scientific name as found on the <a href="/birdsoftheweek">Birds of the Week</a> page.</small>
+                <small class="form-text text-muted">Please use the species' scientific name as found on the <a
+		                 href="{{ url_for('birds_of_the_week') }}">Birds of the Week</a> page.</small>
             </div>
             <div class="col-md-6">
                 <label for="override-type" class="form-label">Override Type</label>

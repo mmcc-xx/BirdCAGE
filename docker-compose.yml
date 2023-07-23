@@ -6,7 +6,7 @@ services:
   # with an image they maintain in the future
   birdnetserver:
     restart: unless-stopped
-    image: mmcc73/birdnetserver:latest # If you are running on an arm64 machine, like a Pi 4, 
+    image: mmcc73/birdnetserver:latest # If you are running on an arm64 machine, like a Pi 4,
                                        # use mmcc73/birdnetserver_arm64:latest as the image name
                                        # This will get you 2.3 of the BirdNET model If you want V2.4, use
                                        # mmcc73/birdnetserver2.4:latest or mmcc73/birdnetserver2.4_arm64:latest
@@ -39,6 +39,7 @@ services:
       PULSE_SERVER: 172.17.0.1 #If you are using soundcard input, you need an address here that will get you to the host. This is
                                #the default gateway address for docker networks, so in most cases will be fine. If you want
                                #to be fancy you can use a device on a remote machine and put its address here. See the wiki
+      #SCRIPT_NAME: /birdcage # Uncomment this if you want to reverse proxy to BirdCAGE at a subfolder like /birdcage/
     tmpfs:
       - /tmp:size=16M #you might want to increase this size if you are recording a bunch of streams, if your
                       # streams are particularly hi-res, or if your analyzer might be periodically unavailable
@@ -59,8 +60,10 @@ services:
     environment:
       API_SERVER_URL: http://192.168.1.75:7007
       WEBUI_PORT: 7008
+      #SCRIPT_NAME: /birdcage # Uncomment this if you want to reverse proxy to BirdCAGE at a subfolder like /birdcage/
       #TITLE_TEXT: Your Title Here
       #TITLE_LINK: http://yourlinkhere
+      #TITLE_TEXT: Your Title Here
       #Include the above variables if you want to put some text, and optionally a link, in the nav bar
     volumes:
       - "/etc/localtime:/etc/localtime:ro"

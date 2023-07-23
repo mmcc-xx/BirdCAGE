@@ -41,9 +41,9 @@ def create_app(init_celery=True):
     if init_celery:
         # Initialize Celery
         app.config['CELERY_BROKER_URL'] = broker_url
-        app.config['CELERY_RESULT_BACKEND'] = result_backend
+        app.config['RESULT_BACKEND'] = result_backend
         # print("Broker URL: " + app.config['CELERY_BROKER_URL'])
-        # print("Result Backend: " + app.config['CELERY_RESULT_BACKEND'])
+        # print("Result Backend: " + app.config['RESULT_BACKEND'])
         app.celery = make_celery(app)
 
         # start recording and processing streams
@@ -72,7 +72,7 @@ def make_celery(app):
     celery = Celery(
         app.import_name,
         broker=app.config['CELERY_BROKER_URL'],
-        backend=app.config['CELERY_RESULT_BACKEND']
+        backend=app.config['RESULT_BACKEND']
     )
     celery.conf.update(app.config)
 

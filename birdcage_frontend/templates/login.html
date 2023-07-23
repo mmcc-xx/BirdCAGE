@@ -42,7 +42,7 @@
                 localStorage.setItem("jwt_token", data.access_token);
 
                 // Redirect to the previously attempted URL or a default protected page
-                const attempted_url = localStorage.getItem("attempted_url") || "/preferences";
+                const attempted_url = localStorage.getItem("attempted_url") || "{{ url_for('preferences') }}";
                 localStorage.removeItem("attempted_url");
                 window.location.href = attempted_url;
             } else {
