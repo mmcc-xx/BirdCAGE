@@ -1,0 +1,13 @@
+version = 1
+
+[[analyzers]]
+name = "sql"
+
+[[analyzers]]
+name = "python"
+
+  [analyzers.meta]
+  runtime_version = "3.x.x"
+
+[[analyzers]]
+name = "docker"
