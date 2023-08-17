@@ -292,6 +292,7 @@ def handle_client(conn, addr):
                                     settings_dict = config_to_settings(userDir + '/BirdNET-Pi/scripts/thisrun.txt')
                                     sendAppriseNotifications(species2,
                                                              str(score),
+                                                             str(round(score * 100)),
                                                              File_Name,
                                                              Date,
                                                              Time,
