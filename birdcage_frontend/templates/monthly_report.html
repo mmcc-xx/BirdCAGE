@@ -167,7 +167,7 @@ Monthly Report
             defaultDate: "{{ month }}",
             onChange: function (selectedDates, dateStr, instance) {
                 if (selectedDates.length > 0) {
-                    const newUrl = `/monthly_report/${dateStr}`;
+                    const newUrl = `{{ script_name }}/monthly_report/${dateStr}`;
                     window.location.href = newUrl;
                 }
             }
