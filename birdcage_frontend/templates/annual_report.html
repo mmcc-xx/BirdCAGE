@@ -185,7 +185,7 @@ Annual Report
             defaultDate: "{{ year }}",
             onChange: function (selectedDates, dateStr, instance) {
                 if (selectedDates.length > 0) {
-                    const newUrl = `/annual_report/${dateStr}`;
+                    const newUrl = `{{ script_name }}/annual_report/${dateStr}`;
                     window.location.href = newUrl;
                 }
             }
