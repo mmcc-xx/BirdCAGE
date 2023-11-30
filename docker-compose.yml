@@ -14,12 +14,14 @@ services:
       - "7667:8080"
 
   redis:
+    restart: unless-stopped
     image: "redis:latest" #the redis server doesn't need to be exposed outside the virtual network, so no "ports"
                           #mapping is needed
     networks:
       - birdcage_net
 
   birdcage_backend:
+    restart: unless-stopped
     image: "mmcc73/birdcage_backend:latest"
     ports:
       - "7007:7007"
@@ -58,6 +60,7 @@ services:
       - birdcage_net
 
   birdcage_frontend:
+    restart: unless-stopped
     image: "mmcc73/birdcage_frontend:latest"
     ports:
       - "7008:7008"
