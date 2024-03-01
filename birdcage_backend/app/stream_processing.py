@@ -435,6 +435,11 @@ def analyze_recordings(self):
 
                     else:
                         print('FAIL')
+                        # 0 bytes from failed ffmpegs causing a loop
+                        if os.stat(file_path).st_size == 0:
+                            os.remove(file_path)
+                            print("Removed " + file_path + " as it was 0 bytes and failed", flush=True)
+
 
             # Clean up recordings once per day.
             if (datetime.now() - last_cleanup_time) > timedelta(days=1):
