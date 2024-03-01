@@ -2,7 +2,8 @@
 FROM python:3.10
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y ffmpeg pulseaudio
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y ffmpeg pulseaudio && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /tmp
 

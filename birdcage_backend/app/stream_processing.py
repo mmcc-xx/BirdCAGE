@@ -69,8 +69,8 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
         if protocol == 'rtsp':
             (
                 ffmpeg
-                    .input(stream_url, rtsp_transport=transport.lower())
-                    .output(output_filename, format='wav', t=seconds, loglevel='warning',
+                    .input(stream_url, rtsp_transport=transport.lower(), t=seconds)
+                    .output(output_filename, format='wav', loglevel='warning',
                             ac=1, ar=48000, sample_fmt='s16')
                     .run(capture_stdout=True, capture_stderr=True)
             )
@@ -78,8 +78,8 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
         elif protocol == 'pulse':
             (
                 ffmpeg
-                    .input(stream_url, f='pulse')
-                    .output(output_filename, format='wav', t=seconds, loglevel='warning',
+                    .input(stream_url, f='pulse', t=seconds)
+                    .output(output_filename, format='wav', loglevel='warning',
                             ac=1, ar=48000, sample_fmt='s16')
                     .run(capture_stdout=True, capture_stderr=True)
             )
