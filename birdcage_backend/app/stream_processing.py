@@ -24,12 +24,28 @@ from .recordingcleanup import recordingcleanup
 from .mqttpub import start_mqtt_client, mqttpublish
 from redis import Redis
 import signal
+from contextlib import contextmanager
+
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 DETECTION_DIR = os.path.join(basedir, '..', DETECTION_DIR_NAME)
 TEMP_DIR = os.path.join(basedir, '..', TEMP_DIR_NAME)
 
 redis_client = Redis(host=REDIS_SERVER, port=REDIS_PORT, db=1)
+
+
+class TimeoutException(Exception): pass
+
+@contextmanager
+def time_limit(seconds):
+    def signal_handler(signum, frame):
+        raise TimeoutException("Timed out!")
+    signal.signal(signal.SIGALRM, signal_handler)
+    signal.alarm(seconds)
+    try:
+        yield
+    finally:
+        signal.alarm(0)
 
 
 def get_youtube_stream_url(youtube_video_url, format_code=None):
@@ -53,8 +69,8 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
         if protocol == 'rtsp':
             (
                 ffmpeg
-                    .input(stream_url, rtsp_transport=transport.lower())
-                    .output(output_filename, format='wav', t=seconds, loglevel='warning',
+                    .input(stream_url, rtsp_transport=transport.lower(), t=seconds)
+                    .output(output_filename, format='wav', loglevel='warning',
                             ac=1, ar=48000, sample_fmt='s16')
                     .run(capture_stdout=True, capture_stderr=True)
             )
@@ -62,8 +78,8 @@ def record_stream_ffmpeg(stream_url, protocol, transport, seconds, output_filena
         elif protocol == 'pulse':
             (
                 ffmpeg
-                    .input(stream_url, f='pulse')
-                    .output(output_filename, format='wav', t=seconds, loglevel='warning',
+                    .input(stream_url, f='pulse', t=seconds)
+                    .output(output_filename, format='wav', loglevel='warning',
                             ac=1, ar=48000, sample_fmt='s16')
                     .run(capture_stdout=True, capture_stderr=True)
             )
@@ -154,8 +170,13 @@ def record_stream(self, stream, preferences):
             # Generate a unique temporary filename
             tmp_filename = TEMP_DIR + f'/{uuid.uuid4().hex}.wav'
 
-            # Record the stream for 15 seconds and save it to the output file
-            result = record_stream_ffmpeg(address, protocol, transport, seconds, tmp_filename)
+            # Record the stream for configured seconds and save it to the output file
+            try:
+                extra_seconds = int(seconds) + 5
+                with time_limit(extra_seconds):
+                    result = record_stream_ffmpeg(address, protocol, transport, seconds, tmp_filename)
+            except TimeoutException as e:
+                print("Recording from " + address  + " went too long......", flush=True)
 
             if result['status'] == 'success':
                 # The recording was successful
@@ -414,6 +435,11 @@ def analyze_recordings(self):
 
                     else:
                         print('FAIL')
+                        # 0 bytes from failed ffmpegs causing a loop
+                        if os.stat(file_path).st_size == 0:
+                            os.remove(file_path)
+                            print("Removed " + file_path + " as it was 0 bytes and failed", flush=True)
+
 
             # Clean up recordings once per day.
             if (datetime.now() - last_cleanup_time) > timedelta(days=1):
