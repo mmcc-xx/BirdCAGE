@@ -77,8 +77,7 @@ Weekly Report
         const [year, week] = weekString.split('-W');
 
         // Calculate the start of the week (Monday)
-        const start = new Date(year, 0, (week) * 7 + 1);
-        start.setDate(start.getDate() - (start.getDay() + 6) % 7);
+        const start = getMondayOfWeek(weekString);
 
         // Calculate the end of the week (Sunday)
         const end = new Date(start);
@@ -157,13 +156,19 @@ ${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => {
             });
     }
 
-
-    function getWeekNumber(date) {
-        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-        const dayOfYear = (date - firstDayOfYear + (86400000 /* ms per day */ * (firstDayOfYear.getDay() + 1))) / 86400000;
-        return Math.ceil(dayOfYear / 7);
+    function getWeekYear(date) {
+        const thursday = new Date(date);
+        thursday.setDate(thursday.getDate() + 3 - (thursday.getDay() + 6) % 7);
+        return thursday.getFullYear();
     }
 
+    function getWeekNumber(date) {
+        const thursday = new Date(date);
+        thursday.setDate(thursday.getDate() + 3 - (thursday.getDay() + 6) % 7);
+        const firstWeek = new Date(thursday.getFullYear(), 0, 4);
+        return 1 + Math.round(((thursday.getTime() - firstWeek.getTime()) / 86400000 - 3 + (firstWeek.getDay() + 6) % 7) / 7);
+    }  
+    
     document.addEventListener('DOMContentLoaded', function () {
         flatpickr('#week-picker', {
             weekNumbers: true,
@@ -172,7 +177,7 @@ ${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => {
             onChange: function (selectedDates, dateStr, instance) {
                 if (selectedDates.length > 0) {
                     const selectedDate = selectedDates[0];
-                    const selectedWeek = selectedDate.getFullYear() + "-W" + getWeekNumber(selectedDate);
+                    const selectedWeek = getWeekYear(selectedDate) + "-W" + getWeekNumber(selectedDate);
                     instance.input.value = selectedWeek;
                     // Redirect to the new URL for the selected week
                     const newUrl = `{{ script_name }}/weekly_report/${selectedWeek}`;
@@ -185,7 +190,10 @@ ${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => {
     function getMondayOfWeek(weekString) {
         const [year, week] = weekString.split('-W');
         const date = new Date(year, 0, (week) * 7 + 1);
-        date.setDate(date.getDate() - (date.getDay() + 6) % 7);
+        if (date.getDay() <= 4) {
+            date.setDate(date.getDate() - 7);
+        }
+        date.setDate(date.getDate() - date.getDay() + 1);
         return date;
     }
 
