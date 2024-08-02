@@ -10,7 +10,7 @@
             <button id="back-btn" class="btn btn-secondary">Go Back</button>
         </div>
         <div class="col-8 text-center">
-            <h1 class="my-4 d-inline-block mx-auto"><span id="detection-common-name"></span></h1>
+            <h1 class="my-4 d-inline-block mx-auto"><a target="_blank" id="detection-common-name" href=""></a></h1>
         </div>
         <div class="col-2"></div> 
     </div>
@@ -60,6 +60,7 @@
                     document.querySelector('#detection-streamname').textContent = detection.streamname;
                     document.querySelector('#detection-scientific-name').textContent = detection.scientific_name;
                     document.querySelector('#detection-common-name').textContent = detection.common_name;
+                    document.querySelector('#detection-common-name').href = "https://www.youtube.com/results?search_query=" + detection.common_name + " call";
                     document.querySelector('#detection-confidence').textContent = detection.confidence;
                     document.querySelector('#detection-filename').textContent = detection.filename;
 

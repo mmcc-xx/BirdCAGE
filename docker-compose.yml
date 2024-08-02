@@ -14,12 +14,14 @@ services:
       - "7667:8080"
 
   redis:
+    restart: unless-stopped
     image: "redis:latest" #the redis server doesn't need to be exposed outside the virtual network, so no "ports"
                           #mapping is needed
     networks:
       - birdcage_net
 
   birdcage_backend:
+    restart: unless-stopped
     image: "mmcc73/birdcage_backend:latest"
     ports:
       - "7007:7007"
@@ -43,7 +45,7 @@ services:
                                #to be fancy you can use a device on a remote machine and put its address here. See the wiki
       #SCRIPT_NAME: /birdcage # Uncomment this if you want to reverse proxy to BirdCAGE at a subfolder like /birdcage/
     tmpfs:
-      - /tmp:size=16M #you might want to increase this size if you are recording a bunch of streams, if your
+      - /tmp:size=64M #you might want to increase this size if you are recording a bunch of streams, if your
                       # streams are particularly hi-res, or if your analyzer might be periodically unavailable
     #volumes_from: #uncomment for HA addon 
     #  - container:addon_local_birdcage #uncomment for HA addon 
@@ -58,6 +60,7 @@ services:
       - birdcage_net
 
   birdcage_frontend:
+    restart: unless-stopped
     image: "mmcc73/birdcage_frontend:latest"
     ports:
       - "7008:7008"
@@ -67,7 +70,6 @@ services:
       #SCRIPT_NAME: /birdcage # Uncomment this if you want to reverse proxy to BirdCAGE at a subfolder like /birdcage/
       #TITLE_TEXT: Your Title Here
       #TITLE_LINK: http://yourlinkhere
-      #TITLE_TEXT: Your Title Here
       #Include the above variables if you want to put some text, and optionally a link, in the nav bar
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
